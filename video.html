@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.B. High School - Upload Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+  /* 🎨 Core Reset & Variables */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background-color: #f0f4f8;
+    color: #2d3748;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* 🏛️ Header Section */
+  .header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 40px 20px;
+    box-shadow: 0 4px 20px rgba(30, 60, 114, 0.15);
+    margin-bottom: 30px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .header p {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 6px;
+    font-weight: 400;
+  }
+
+  /* 📦 Main Container */
+  .container {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* 💳 Card Box Style */
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card h2 {
+    font-size: 22px;
+    margin-bottom: 24px;
+    color: #1e3c72;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 12px;
+  }
+
+  /* 📤 Form Controls */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4a5568;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="url"],
+  .form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #2d3748;
+    outline: none;
+    transition: all 0.25s ease;
+    background-color: #f8fafc;
+  }
+
+  /* 🎨 Focus & Hover States */
+  .form-group input:focus, 
+  .form-group select:focus {
+    border-color: #2a5298;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.12);
+  }
+
+  /* 📁 File Input Custom Styling */
+  .form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .form-group input[type="file"]::file-selector-button {
+    background: #e2e8f0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: #4a5568;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: background 0.2s ease;
+  }
+
+  .form-group input[type="file"]::file-selector-button:hover {
+    background: #cbd5e0;
+  }
+
+  /* 🔘 Primary Upload Button */
+  .btn-upload {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: #ffffff;
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+    transition: all 0.2s ease;
+  }
+
+  .btn-upload:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-upload:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+  }
+
+  /* 📱 Mobile Responsive Adjustment */
+  @media (max-width: 480px) {
+    .card {
+      padding: 20px;
+    }
+    .header {
+      padding: 25px 15px;
+    }
+    .header h1 {
+      font-size: 22px;
+    }
+  }
+</style>
+
+</head>
+<body>
+    <!-- 🏛️ हेडर (स्कूल का नाम) -->
+  <header class="header">
+    <h1>B.B. HIGH SCHOOL</h1>
+    <p>Teacher Portal - Document & Resource Hub</p>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>📤Upload portal (File & YouTube)</h2>
+      
+      <form id="uploadForm">
+        
+        <!-- 1. अपलोड टाइप सेलेक्ट करें -->
+        <div class="form-group">
+          <label for="uploadType">what you like to upload today?</label>
+          <select id="uploadType">
+            <option value="file">🎥 pc/ mobile (Video/PDF/Image)</option>
+            <option value="youtube">▶️ YouTube video link (URL)</option>
+          </select>
+        </div>
+
+        <!-- 2. फाइल इनपुट (बाय डिफॉल्ट दिखेगा) -->
+        <div class="form-group" id="fileInputGroup">
+          <label for="fileInput">choose file:</label>
+          <input type="file" id="fileInput" accept="image/*,video/*,application/pdf">
+        </div>
+
+        <!-- 3. यूट्यूब इनपुट (बाय डिफॉल्ट छिपा रहेगा) -->
+        <div class="form-group" id="youtubeInputGroup" style="display: none;">
+          <label for="youtubeUrlInput">Put YouTube video link:</label>
+          <input type="url" id="youtubeUrlInput" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+
+        <!-- 4. टाइटल -->
+        <div class="form-group">
+          <label for="fileTitle">Video or File name:</label>
+          <input type="text" id="fileTitle" placeholder="Ex: 10th Class Science Lecture" required>
+        </div>
+
+        <button type="submit" class="btn-upload" id="btnupload">Submit</button>
+
+      </form>
+    </div>
+  </div>
+
+<script type="module">
+  import { db } from "./firebase-config.js";
+  import { uploadToCloudinary } from "./cloudinaryService.js";
+  import { 
+    collection, 
+    setDoc,
+    doc,
+    where,
+    query,
+    getDocs,
+    serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { 
+    getAuth, onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+  let currentTeacherData = null;
+
+  // 🔒 1. FIREBASE AUTH SESSION CHECK
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const qTeacher = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const teacherSnap = await getDocs(qTeacher);
+
+        if (!teacherSnap.empty) {
+          currentTeacherData = teacherSnap.docs[0].data();
+        } else {
+          window.location.href = "login.html";
+        }
+      } catch (err) {
+        console.error("Teacher Fetch Error:", err);
+      }
+    } else {
+      window.location.href = "index.html";
+    }
+  });
+
+
+
+  // HTML एलिमेंट्स
+  const uploadType = document.getElementById("uploadType");
+  const fileGroup = document.getElementById("fileInputGroup");
+  const ytGroup = document.getElementById("youtubeInputGroup");
+  const uploadForm = document.getElementById("uploadForm");
+
+  // UI स्विच करने का लॉजिक
+  uploadType.addEventListener("change", () => {
+    const isYoutube = uploadType.value === "youtube";
+    fileGroup.style.display = isYoutube ? "none" : "block";
+    ytGroup.style.display = isYoutube ? "block" : "none";
+  });
+
+  // YouTube Embed Link फ़ंक्शन
+  function getEmbedUrl(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) 
+      ? `https://www.youtube.com/embed/${match[2]}` 
+      : null;
+  }
+
+  // Firestore Data Save फ़ंक्शन (Custom Document ID with fileName)
+  async function saveToDatabase(fileName, fileUrl, mediaType, cloudName, publicId) {
+    try {
+      await setDoc(doc(db, "videos_files", fileName), {
+        name: fileName,
+        url: fileUrl,
+        views: 0,
+        type: mediaType,
+        cloudName: cloudName,
+        publicId: publicId,
+        createdAt: serverTimestamp()
+      });
+
+      Swal.fire("Success!", "File/Video uploaded and saved successfully!", "success");
+      uploadForm.reset();
+      
+      fileGroup.style.display = "block";
+      ytGroup.style.display = "none";
+
+    } catch (error) {
+      console.error("Save Error:", error);
+      Swal.fire("Error!", "Failed to save data in database.", "error");
+    }
+  }
+
+  // Form Submit Event
+  uploadForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const selectedType = uploadType.value;
+    let fileName = "";
+    let finalUrl = "";
+  
+    try {
+      if (selectedType === "youtube") {
+        // 🔴 YouTube Logic
+        fileName = document.getElementById("fileTitle").value.trim();
+        let rawUrl = document.getElementById("youtubeUrlInput").value.trim();
+        finalUrl = getEmbedUrl(rawUrl);
+
+        if (!finalUrl) {
+          Swal.fire("Invalid URL", "Please enter a valid YouTube link!", "error");
+          return;
+        }
+
+        if (!fileName) {
+          Swal.fire("Missing Title", "Please enter a title for the video!", "warning");
+          return;
+        }
+
+        Swal.fire({
+          title: 'Saving data...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        await saveToDatabase(fileName, finalUrl, "youtube" , "null", "null");
+
+      } else {
+        // 🟢 File Upload Logic
+        const fileInput = document.getElementById("fileInput");
+        if (fileInput.files.length === 0) {
+          Swal.fire("No File", "Please select a file to upload!", "error");
+          return;
+        }
+
+        const customTitle = document.getElementById("fileTitle").value.trim();
+        fileName = customTitle !== "" ? customTitle : fileInput.files[0].name;
+
+        Swal.fire({
+          title: 'Uploading to cloud...',
+          text: 'Please wait while the file is uploading',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        const cloudinaryResult = await uploadToCloudinary(fileInput.files[0]);
+        
+        await saveToDatabase(fileName, cloudinaryResult.fileUrl, "file", cloudinaryResult.cloudName, cloudinaryResult.publicId);
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "An error occurred during upload or saving!", "error");
+    }
+  });
+</script>
+
+
+</body>
+</html>

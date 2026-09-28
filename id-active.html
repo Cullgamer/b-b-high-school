@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage IDs - B.B. High School</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #f4f6f9; color: #333; }
+
+    .navbar {
+      background: #b83b19; color: white; padding: 15px 20px;
+      display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .back-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; margin-right: 15px; }
+    
+    .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+    .section-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #555; }
+
+    .id-card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 5px solid #ff9800;
+    }
+
+    .id-info h3 { font-size: 16px; margin-bottom: 5px; color: #222; }
+    .id-info p { font-size: 13px; color: #666; margin-bottom: 4px; }
+
+    .action-btns { display: flex; gap: 10px; margin-top: 12px; }
+    
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .approve-btn { background-color: #28a745; color: white; }
+    .approve-btn:active { transform: scale(0.95); }
+
+    .delete-btn { background-color: #dc3545; color: white; }
+    .delete-btn:active { transform: scale(0.95); }
+
+    #no-request { text-align: center; margin-top: 50px; color: #888; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <button class="back-btn" onclick="window.history.back()">←</button>
+      <button class="back-btn" onclick="ve()">→</button>
+    <div class="school-title">Manage Teacher Accounts</div>
+  </div>
+
+  <div class="container">
+    <div class="section-title">Pending Teacher Approvals</div>
+
+    <!-- Dynamic Container -->
+    <div id="pendingListContainer"></div>
+
+    <!-- Empty State -->
+    <div id="no-request" style="display: none;">
+      <p>🎉 No pending approvals right now!</p>
+    </div>
+  </div>
+
+  <script type="module">
+  import { db } from "./firebase-config.js";
+  import { 
+    collection, 
+    query, 
+    where, 
+    onSnapshot, 
+    doc, 
+    getDocs,
+    getDoc,
+    updateDoc, 
+    deleteDoc 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 🔐 Firebase Auth Imports
+  import { 
+    getAuth, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+  const pendingListContainer = document.getElementById("pendingListContainer");
+  const noRequestDiv = document.getElementById("no-request");
+
+  // 🔒 1. FIREBASE AUTH SESSION CHECK
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const querySnap = await getDocs(q);
+
+        if (!querySnap.empty) {
+          const teacherData = querySnap.docs[0].data();
+          const nameElement = document.getElementById("teacherName");
+          if (nameElement) {
+            nameElement.innerText = teacherData.fullName || "Principal Sir";
+          }
+          if(teacherData.status !== "approved"){await Swal.fire({
+      title: 'Admin lock',
+      text: 'You are id is tamperly locked by admin',
+      icon: 'warning',
+      confirmButtonColor: '#b83b19',
+      confirmButtonText: 'ok!',
+    });
+              window.location.href = "index.html";
+            }
+        } else {
+          window.location.href = "index.html";
+        }
+      } catch (error) {
+        console.error("Error fetching principal data:", error);
+      }
+    } else {
+      // अगर लॉगिन नहीं है तो डायरेक्ट लॉगिन पेज पर भेज दो
+      window.location.href = "index.html";
+    }
+  });
+
+  // 2. Fetch only teachers whose status is "pending"
+  const q = query(collection(db, "teachers"), where("status", "==", "pending"));
+
+  onSnapshot(q, (snapshot) => {
+    pendingListContainer.innerHTML = "";
+
+    if (snapshot.empty) {
+      noRequestDiv.style.display = "block";
+      return;
+    }
+
+    noRequestDiv.style.display = "none";
+
+    snapshot.forEach((docSnap) => {
+      const teacher = docSnap.data();
+      const docId = docSnap.id;
+
+      const cardHTML = `
+        <div class="id-card">
+          <div class="id-info">
+            <h3>👤 ${teacher.fullName || "Unknown Teacher"}</h3>
+            <p><b>Teacher ID:</b> ${teacher.teacherId || docId}</p>
+            <p><b>Subject:</b> ${teacher.subject || "N/A"}</p>
+            <p><b>Role:</b> ${teacher.role || "teacher"}</p>
+          </div>
+          <div class="action-btns">
+            <button class="approve-btn" onclick="approveTeacher('${docId}')">Approve</button>
+            <button class="delete-btn" onclick="deleteTeacher('${docId}')">Delete</button>
+          </div>
+        </div>
+      `;
+
+      pendingListContainer.innerHTML += cardHTML;
+    });
+  });
+
+  // 3. Approve Teacher Logic (Status = approved)
+  window.approveTeacher = async function(id) {
+    const confirmResult = await Swal.fire({
+      title: 'Approve Teacher?',
+      text: 'This user will get full access to the teacher portal.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Approve!'
+    });
+
+    if (confirmResult.isConfirmed) {
+      try {
+        await updateDoc(doc(db, "teachers", id), { status: "approved" });
+        Swal.fire({
+          title: 'Approved!',
+          text: 'Teacher account is now active.',
+          icon: 'success',
+          confirmButtonColor: '#FF5722'
+        });
+      } catch (error) {
+        console.error("Approve error:", error);
+        Swal.fire('Error!', 'Failed to approve account.', 'error');
+      }
+    }
+  };
+
+  // 4. Delete Teacher Logic
+  window.deleteTeacher = async function(id) {
+  const confirmResult = await Swal.fire({
+    title: 'Delete Request?',
+    text: 'This registration request and Firebase Auth account will be deleted permanently!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Yes, Delete!'
+  });
+
+  if (confirmResult.isConfirmed) {
+    try {
+      // 1. टीचर का डेटा निकालकर UID प्राप्त करें
+      const teacherDoc = await getDoc(doc(db, "teachers", id));
+      
+      if (teacherDoc.exists()) {
+        const teacherData = teacherDoc.data();
+        const userUid = teacherData.uid;
+
+        // 2. Netlify Function के ज़रिए Firebase Auth से डिलीट करें
+        if (userUid) {
+          await fetch('/.netlify/functions/delete-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid: userUid })
+          });
+        }
+      }
+
+      // 3. Firestore Database से डॉक्यूमेंट डिलीट करें
+      await deleteDoc(doc(db, "teachers", id));
+
+      Swal.fire({
+        title: 'Deleted!',
+        text: 'User removed from Database & Auth successfully.',
+        icon: 'success',
+        confirmButtonColor: '#FF5722'
+      });
+
+    } catch (error) {
+      console.error("Delete error:", error);
+      Swal.fire('Error!', 'Failed to delete request.', 'error');
+    }
+  }
+};
+
+  window.ve = function () {
+    window.location.href = "viweID.html";
+  };
+</script>
+
+</body>
+</html>

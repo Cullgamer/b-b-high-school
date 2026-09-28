@@ -1,0 +1,359 @@
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Principal Home - B.B. High School</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="brand.css">
+<script src="brand.js" defer></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+    }
+
+    .navbar {
+      background: #b83b19;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .school-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      background-color: #ffffff;
+      color: #b83b19;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .logout-btn:active {
+      transform: scale(0.95);
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+        .logo-container { 
+      text-align: center; 
+      margin-bottom: 15px;
+    }
+    
+    .logo-container img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+      border-radius: 15px;
+    }
+
+    .welcome-card {
+      background: linear-gradient(135deg, #ffffff, #fff3ee);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      border-left: 6px solid #b83b19;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .welcome-card h2 {
+      font-size: 20px;
+      color: #222;
+      margin-bottom: 5px;
+    }
+
+    .welcome-card p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .grid-menu {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);   
+      gap: 10px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px 15px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card:active {
+      transform: scale(0.97);
+      background-color: #fcfcfc;
+    }
+
+    .card-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 10px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .card-desc {
+      font-size: 6px;
+      color: #888;
+      margin-top: 4px;
+    }
+   
+  </style>
+</head>
+<body>
+
+  <!-- Principal Home Main Div -->
+  <div id="teacherHome">
+
+    <!-- Top Navbar -->
+    <div class="navbar">
+      <div class="school-title">🏫 B.B. High School</div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Content Container -->
+    <div class="container">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-card">
+        <h2>Welcome, <span id="teacherName">Principal Sir</span>! 👋</h2>
+        <p>Manage today's School activities.</p>
+      </div>
+
+      <div class="section-title">Main Dashboard</div>
+
+      <!-- 6 Action Cards Grid -->
+      <div class="grid-menu">
+        
+        <!-- Card 1 -->
+        <div class="card" onclick="openNotice()">
+          <div class="card-icon">📢</div>
+          <div class="card-title">Notice Board</div>
+          <div class="card-desc">View / Upload Notices</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="card" onclick="openAttendance()">
+          <div class="card-icon">📝</div>
+          <div class="card-title">Attendance</div>
+          <div class="card-desc">Mark Student Attendance</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="card" onclick="openStudyMaterial()">
+          <div class="card-icon">📁</div>
+          <div class="card-title">Study Material</div>
+          <div class="card-desc">Share PDFs / Files</div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="card" onclick="openMarks()">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Marks / Results</div>
+          <div class="card-desc">Update Student Marks</div>
+        </div>
+
+        <!-- Card 5 (ID Status Active/Delete) -->
+        <div class="card" onclick="pendingID()">
+          <div class="card-icon">👤</div>
+          <div class="card-title">Active / Pending IDs</div>
+          <div class="card-desc">Manage teacher accounts</div>
+        </div>
+
+        <!-- Card 6 (Notice Approval) -->
+        <div class="card" onclick="noticeapprove()">
+          <div class="card-icon">✅</div>
+          <div class="card-title">Approve Notices</div>
+          <div class="card-desc">Update notice status</div>
+        </div>
+        
+        <div class="card" onclick="videow()">
+          <div class="card-icon">🎥</div>
+          <div class="card-title"> Watch lectures</div>
+          <div class="card-desc">lectures video</div>
+        </div>
+        
+        <div class="card" onclick="videou()">
+          <div class="card-icon">📤</div>
+          <div class="card-title">Upload video & YouTube links</div>
+          <div class="card-desc">video uploader</div>
+          
+        </div>
+        
+          <div class="card" onclick="calc()">
+          <div class="logo-container"><img src="logo.png" alt="Calculator Logo"></div>
+          <div class="card-title">calculator</div>
+          <div class="card-desc">Quick Calculations</div>
+          
+      </div> <!-- Grid Menu End -->
+       <div class="card" onclick="fromview()">
+          <div class="card-icon">🪪</div>
+          <div class="card-title">View Student Addmission Froms</div>
+          <div class="card-desc">View Froms</div>
+          
+        </div>
+        
+         <div class="card" onclick="fromUp()">
+          <div class="card-icon">📤</div>
+          <div class="card-title">From Uploader</div>
+          <div class="card-desc">from uploader</div>
+          
+        </div>
+    </div> <!-- Container End -->
+  </div> <!-- Main Div End -->
+
+  <script type="module">
+  import { db } from "./firebase-config.js";
+  import { 
+    collection, query, where, getDocs 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  
+  // 🔐 Firebase Auth Imports
+  import { 
+    getAuth, onAuthStateChanged, signOut 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+
+  // 🔒 1. FIREBASE AUTH SESSION CHECK
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const querySnap = await getDocs(q);
+
+        if (!querySnap.empty) {
+          const teacherData = querySnap.docs[0].data();
+          const nameElement = document.getElementById("teacherName");
+          if (nameElement) {
+            nameElement.innerText = teacherData.fullName || "Principal Sir";
+          }
+          if(teacherData.status !== "approved"){await Swal.fire({
+      title: 'Admin lock',
+      text: 'You are id is tamperly locked by admin',
+      icon: 'warning',
+      confirmButtonColor: '#b83b19',
+      confirmButtonText: 'ok!',
+    });
+              window.location.href = "index.html";
+            }
+        } else {
+          window.location.href = "index.html";
+        }
+      } catch (error) {
+        console.error("Error fetching principal data:", error);
+      }
+    } else {
+      // अगर लॉगिन नहीं है तो डायरेक्ट लॉगिन पेज पर भेज दो
+      window.location.href = "index.html";
+    }
+  });
+
+  // 🚪 2. Logout Function (Firebase Auth SignOut)
+  window.logout = async function() {
+    const confirmLogout = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to log out?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#b83b19',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Log out!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (confirmLogout.isConfirmed) {
+      await signOut(auth);
+      window.location.href = "index.html";
+    }
+  };
+
+  // 📍 Navigation Links (Principal Special Functions Included)
+  window.openNotice = function() {
+    window.location.href = "notice.html";
+  };
+  window.calc = function() {
+    window.location.href = "calculator.html";
+  };
+
+  window.openAttendance = function() {
+    Swal.fire({
+      title: 'Coming Soon!',
+      text: 'This feature is under development.',
+      icon: 'info',
+      confirmButtonColor: '#b83b19'
+    });
+  };
+  window.videow = function() {
+    window.location.href = "video-view.html";
+  };
+  window.videou = function() {
+    window.location.href = "video.html";};
+
+  window.openStudyMaterial = function() {
+    window.location.href = "files.html";
+  };
+
+  window.openMarks = function() {
+    window.location.href = "marks.html";
+  };
+  window.fromview = function() {
+    window.location.href = "viewaddmissions.html";
+  };
+  window.fromUp = function() {
+    window.location.href = "admission.html";
+  };
+
+  // 👑 Principal Only Features
+  window.pendingID = function() {
+    window.location.href = "id-active.html";
+  };
+
+  window.noticeapprove = function() {
+    Swal.fire({
+      title: 'Coming Soon!',
+      text: 'This feature is under development we transfer you in management IDs',
+      icon: 'info',
+      confirmButtonColor: '#b83b19'
+    });
+  };
+</script>
+
+</body>
+</html>

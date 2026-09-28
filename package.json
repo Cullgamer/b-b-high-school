@@ -1,0 +1,9 @@
+{
+  "name": "bb-high-school-portal",
+  "version": "1.0.0",
+  "description": "School Portal Functions",
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^11.11.1"
+  }
+}

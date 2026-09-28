@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admission Form - B.B. High School</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            padding-bottom: 30px;
+        }
+        /* Top Header */
+        .header {
+            background-color: #c93b2b;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .back-btn {
+            background: white;
+            color: #c93b2b;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        /* Container Card */
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            color: #c93b2b;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            background: #fafafa;
+            color: #333;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #c93b2b;
+            background: #fff;
+        }
+        /* File Input Styling */
+        .file-input-wrapper {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        /* Submit Button */
+        .submit-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover {
+            background-color: #2ea043;
+        }
+        /* Footer Branding */
+        .footer {
+            text-align: center;
+            color: #777;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+        .footer span {
+            color: #c93b2b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Header -->
+<div class="header">
+    <h1 id="headerTitle">📋 Admission - B.B. High School</h1>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <!-- Language Selector -->
+        <select id="langSwitch" class="form-select" style="width: 110px; padding: 4px; font-size: 0.85rem;">
+            <option value="en">English</option>
+            <option value="mr">मराठी</option>
+        </select>
+        <button class="back-btn" onclick="window.history.back()" id="backBtn">Back</button>
+    </div>
+</div>
+
+<div class="container">
+    
+    <!-- Admission Form Card -->
+    <div class="card">
+        <div class="card-title" id="formTitle">Fill Student Admission Form</div>
+        
+        <form id="admissionF">
+            <div class="form-group">
+                <label class="form-label" id="lblPhoto">Student Passport Photo</label>
+                <input type="file" id="photo-s" class="form-input file-input-wrapper">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblStudentName">Student Full Name</label>
+                <input type="text" class="form-input" id="studentn" placeholder="Enter student name" required>
+            </div>
+
+           
+            <div class="form-group">
+                <label class="form-label" id="lblMotherName">Mother's Name</label>
+                <input type="text" class="form-input" id="mothern" placeholder="Enter mother's name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblStudentId">Aadhaar No. / Apaar ID / Student ID</label>
+                <input type="text" class="form-input" id="studentId" placeholder="Enter Aadhaar or Apaar ID">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblNationality">Nationality & Mother Tongue</label>
+                <input type="text" class="form-input" id="nationalityLang" placeholder="e.g., Indian, Marathi">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblCaste">Religion, Caste & Sub-Caste</label>
+                <input type="text" class="form-input" id="casteDetails" placeholder="e.g., General/OBC">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblBirthPlace">Place of Birth (Village, District, State)</label>
+                <input type="text" class="form-input" id="birthPlace" placeholder="Enter place of birth">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblClass">Applying for Class</label>
+                <select class="form-select" id="st">
+                    <option value="" id="optSelectClass">Select Class</option>   
+                    <option value="8">Class 8th</option>
+                    <option value="9">Class 9th</option>
+                    <option value="10">Class 10th</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblGuardian">Father's / Guardian's Name</label>
+                <input type="text" class="form-input" id="guardian" placeholder="Enter guardian name">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblMobile">Contact Number</label>
+                <input type="tel" class="form-input" id="Mobilenum" placeholder="Enter 10-digit mobile number">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblDob">Date of Birth</label>
+                <input type="text" class="form-input" id="BOD" placeholder="18/01/2010" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblAddress">Address</label>
+                <input type="text" class="form-input" id="address" placeholder="Enter address">
+            </div>
+
+
+            <div class="form-group">
+                <label class="form-label" id="lblLeavingDate">Date of Leaving School (If left)</label>
+                <input type="text" class="form-input" id="leavingDate" placeholder="DD/MM/YYYY">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblLeavingReason">Reason for Leaving School</label>
+                <input type="text" class="form-input" id="leavingReason" placeholder="e.g., Passed out / Shifted">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="lblMarklist">Previous Marksheet / Documents (Optional)</label>
+                <input type="file" id="marklist" class="form-input file-input-wrapper">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Application</button>
+        </form>
+    </div>
+
+    <!-- History / Status Card -->
+    <div class="card">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="historyTitle">Admission History & Applications</span>
+            <select id="yearFilter" class="form-select" style="width: 120px; padding: 4px; font-size: 0.85rem;">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+            </select>
+        </div>
+        
+        <div id="admissionListContainer">
+            <p style="font-size: 0.9rem; color: #666;" id="loadingText">Loading submissions...</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Designed & Developed by <span>[Rohan Mankar (Cullgamerfast)]</span>
+    </div>
+</div>
+
+<script type="module">
+  import { db } from "./firebase-config.js";
+  import { uploadToCloudinary } from "./cloudinaryService.js";
+  import { 
+    addDoc, serverTimestamp, doc, setDoc, collection, query, orderBy, where, getDocs, onSnapshot 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+  let currentTeacherData = null;
+
+
+  const translations = {
+      en: {
+          headerTitle: "📋 Admission - B.B. High School",
+          backBtn: "Back",
+          formTitle: "Fill Student Admission Form",
+          lblPhoto: "Student Passport Photo",
+          lblStudentName: "Student Full Name",
+          lblMotherName: "Mother's Name",
+          lblStudentId: "Aadhaar No. / Apaar ID / Student ID",
+          lblNationality: "Nationality & Mother Tongue",
+          lblCaste: "Religion, Caste & Sub-Caste",
+          lblBirthPlace: "Place of Birth (Village, District, State)",
+          lblClass: "Applying for Class",
+          optSelectClass: "Select Class",
+          lblGuardian: "Father's / Guardian's Name",
+          lblMobile: "Contact Number",
+          lblDob: "Date of Birth",
+          lblAddress: "Address",
+          lblLeavingDate: "Date of Leaving School (If left)",
+          lblLeavingReason: "Reason for Leaving School",
+          lblMarklist: "Previous Marksheet / Documents (Optional)",
+          submitBtn: "Submit Application",
+          historyTitle: "Admission History & Applications",
+          loadingText: "Loading submissions..."
+      },
+      mr: {
+          headerTitle: "📋 प्रवेश अर्ज - बी.बी. हायस्कूल",
+          backBtn: "मागे",
+          formTitle: "विद्यार्थ्याचा प्रवेश अर्ज भरा",
+          lblPhoto: "विद्यार्थ्याचा पासपोर्ट फोटो",
+          lblStudentName: "विद्यार्थ्याचे पूर्ण नाव",
+          lblMotherName: "आईचे नाव",
+          lblStudentId: "आधार क्र. / अपार आयडी / स्टुडंट आयडी",
+          lblNationality: "राष्ट्रीयत्व आणि मातृभाषा",
+          lblCaste: "धर्म, जात आणि उपजात",
+          lblBirthPlace: "जन्म ठिकाण (गाव, जिल्हा, राज्य)",
+          lblClass: "कोणत्या वर्गात प्रवेश हवा आहे",
+          optSelectClass: "वर्ग निवडा",
+          lblGuardian: "वडील / पालकाचे नाव",
+          lblMobile: "मोबाईल नंबर",
+          lblDob: "जन्मतारीख",
+          lblAddress: "पत्ता",
+          lblLeavingDate: "शाळा सोडल्याची तारीख (असल्यास)",
+          lblLeavingReason: "शाळा सोडल्याचे कारण",
+          lblMarklist: "मागील गुणपत्रिका / कागदपत्रे (वैकल्पिक)",
+          submitBtn: "अर्ज सबमिट करा",
+          historyTitle: "प्रवेश इतिहास आणि अर्ज",
+          loadingText: "माहिती लोड होत आहे..."
+      }
+  };
+
+
+  document.getElementById("langSwitch").addEventListener("change", (e) => {
+      const lang = e.target.value;
+      const t = translations[lang];
+
+      document.getElementById("headerTitle").innerText = t.headerTitle;
+      document.getElementById("backBtn").innerText = t.backBtn;
+      document.getElementById("formTitle").innerText = t.formTitle;
+      document.getElementById("lblPhoto").innerText = t.lblPhoto;
+      document.getElementById("lblStudentName").innerText = t.lblStudentName;
+      document.getElementById("lblMotherName").innerText = t.lblMotherName;
+      document.getElementById("lblStudentId").innerText = t.lblStudentId;
+      document.getElementById("lblNationality").innerText = t.lblNationality;
+      document.getElementById("lblCaste").innerText = t.lblCaste;
+      document.getElementById("lblBirthPlace").innerText = t.lblBirthPlace;
+      document.getElementById("lblClass").innerText = t.lblClass;
+      document.getElementById("optSelectClass").innerText = t.optSelectClass;
+      document.getElementById("lblGuardian").innerText = t.lblGuardian;
+      document.getElementById("lblMobile").innerText = t.lblMobile;
+      document.getElementById("lblDob").innerText = t.lblDob;
+      document.getElementById("lblAddress").innerText = t.lblAddress;
+      document.getElementById("lblLeavingDate").innerText = t.lblLeavingDate;
+      document.getElementById("lblLeavingReason").innerText = t.lblLeavingReason;
+      document.getElementById("lblMarklist").innerText = t.lblMarklist;
+      document.getElementById("submitBtn").innerText = t.submitBtn;
+      document.getElementById("historyTitle").innerText = t.historyTitle;
+      document.getElementById("loadingText").innerText = t.loadingText;
+  });
+
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const querySnap = await getDocs(q);
+        if (!querySnap.empty) {
+          currentTeacherData = querySnap.docs[0].data();
+        } else {
+          window.location.href = "index.html";
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+      }
+    } else {
+      window.location.href = "index.html";
+    }
+  });
+
+  // Cloudinary Upload
+
+
+  const admissionF = document.getElementById("admissionF");
+  admissionF.addEventListener("submit", async (e) => {
+       e.preventDefault();
+       
+       const studentn = document.getElementById("studentn").value.trim();
+       const mothern = document.getElementById("mothern").value.trim(); // नई फील्ड: माता का नाम
+       const guardian = document.getElementById("guardian").value;
+       const mobilenum = document.getElementById("Mobilenum").value.trim();
+       const st = document.getElementById("st").value;
+       const aDdress = document.getElementById("address").value;
+       const BOD = document.getElementById("BOD").value.trim();
+       const studentIdField = document.getElementById("studentId").value;
+       const nationalityLang = document.getElementById("nationalityLang").value;
+       const casteDetails = document.getElementById("casteDetails").value;
+       const birthPlace = document.getElementById("birthPlace").value;
+       const leavingDate = document.getElementById("leavingDate").value;
+       const leavingReason = document.getElementById("leavingReason").value;
+       
+       const marklist = document.getElementById("marklist").files[0];
+       const photos = document.getElementById("photo-s").files[0];
+       
+       
+              let marklistdone = "";
+       let photostudent = "";
+       let marcloudn = "";
+       let markpublicid = "";
+       let studentphotoCN = "";
+       let studentphotoPublic = "";
+
+       if (marklist) {
+           Swal.fire({ title: 'Uploading file...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+           try { 
+               const result1 = await uploadToCloudinary(marklist); 
+               marklistdone = result1.fileUrl;
+               marcloudn = result1.cloudName;
+               markpublicid = result1.publicId;
+           } 
+           catch (err) { Swal.fire('Error', 'File upload failed!', 'error'); return; }
+       }
+
+       if (photos) {
+           Swal.fire({ title: 'Uploading photo...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+           try { 
+               const result2 = await uploadToCloudinary(photos);
+               photostudent = result2.fileUrl;
+               studentphotoCN = result2.cloudName;
+               studentphotoPublic = result2.publicId;
+           } 
+           catch (err) { Swal.fire('Error', 'Photo upload failed!', 'error'); return; }
+       }
+
+       let addmissionData = {
+           status: "pending",
+           createdAt: new Date(),
+       };
+
+       if (studentn !== "") { addmissionData.studentName = studentn; }
+       if (mothern !== "") { addmissionData.motherName = mothern; }
+       if (st !== "") { addmissionData.admissionClass = st; }
+       if (mobilenum !== "") { addmissionData.mobileNumber = mobilenum; }
+       if (marklistdone !== "") { addmissionData.previousMarklist = marklistdone; }
+       if (photostudent !== "") { addmissionData.studentPhotoUrl = photostudent; }
+       if (BOD !== "") { addmissionData.dob = BOD; }
+       if (guardian !== "") { addmissionData.Father_or_Mother = guardian; }
+       if (aDdress !== "") { addmissionData.address = aDdress; }
+       if (studentIdField !== "") { addmissionData.studentIdNo = studentIdField; }
+       if (nationalityLang !== "") { addmissionData.nationalityAndLang = nationalityLang; }
+       if (casteDetails !== "") { addmissionData.casteInfo = casteDetails; }
+       if (birthPlace !== "") { addmissionData.birthPlaceInfo = birthPlace; }
+       if (leavingDate !== "") { addmissionData.schoolLeavingDate = leavingDate; }
+       if (leavingReason !== "") { addmissionData.schoolLeavingReason = leavingReason; }
+       
+      
+       if (studentphotoCN) { addmissionData.S_P_C_N = studentphotoCN; }
+       if (studentphotoPublic) { addmissionData.S_P_P_ID = studentphotoPublic; }
+       if (marcloudn) { addmissionData.M_C_N = marcloudn; }
+       if (markpublicid) { addmissionData.M_P_ID = markpublicid; }
+
+
+       const uniqueStudentAdmissionId = `${studentn}_${mothern}_${BOD}`.replace(/\s+/g, '_');
+
+       try {
+           await setDoc(doc(db, "admissionForms", uniqueStudentAdmissionId), addmissionData, { merge: true });
+
+           Swal.fire({
+               title: 'Success!',
+               text: 'Admission form submitted successfully!',
+               icon: 'success',
+               confirmButtonColor: '#b83b19'
+           });
+
+           admissionF.reset();
+       } catch(dbErr) {
+           console.log("Database error:", dbErr);
+           Swal.fire('Error', 'Failed to save data to database!', 'error');
+       }
+   });
+
+
+   async function loda() {
+       const selectedyear = document.getElementById("yearFilter").value;
+       const container = document.getElementById("admissionListContainer");
+       
+       container.innerHTML = "<p style='font-size: 0.9rem; color: #666;'>Fetching records...</p>";
+       try {
+         const q = query(collection(db, "admissionForms"), orderBy("createdAt", "desc"));
+
+         onSnapshot(q, (studentdata) => {
+             container.innerHTML = ""; 
+
+             if (studentdata.empty) {
+                 container.innerHTML = "<p style='font-size: 0.9rem; color: #666;'>No submissions found.</p>";
+                 return;
+             }
+
+             let htmlContent = "";
+             let count = 0;
+
+             studentdata.forEach((docSnap) => {
+                 const data = docSnap.data();
+                 let submissionDate = data.createdAt ? data.createdAt.toDate() : new Date();
+                 let formYear = submissionDate.getFullYear().toString();
+
+                 if (formYear === selectedyear) {
+                     count++;
+                     htmlContent += `
+                         <div class="student-card" data-id="${docSnap.id}" style="background: #fafafa; border: 1px solid #ddd; padding: 12px; border-radius: 6px; margin-bottom: 10px; cursor: pointer;">
+                             <h4 style="color: #c93b2b;">🎓 ${data.studentName} 
+                             <p style="font-size: 0.85rem; color: #444;">Class: ${data.admissionClass}th | Mobile: ${data.mobileNumber || 'N/A'}</p>
+                         </div>
+                     `;
+                 }
+             });
+
+             if (count === 0) {
+                 container.innerHTML = `<p style='font-size: 0.9rem; color: #666;'>No applications found for ${selectedyear}.</p>`;
+             } else {
+                 container.innerHTML = htmlContent;
+             }
+
+             document.querySelectorAll(".student-card").forEach(card => {
+                 card.addEventListener("click", () => {
+                     const studentId = card.getAttribute("data-id");
+                     window.location.href = `detail.html?id=${studentId}`;
+                 });
+             });
+         });
+       } catch (error) {
+         console.error("Error loading data:", error);
+         container.innerHTML = "<p style='font-size: 0.9rem; color: red;'>Failed to load records.</p>";
+       }
+   }
+
+   document.getElementById("yearFilter").addEventListener("change", loda);
+   window.addEventListener("DOMContentLoaded", loda);
+</script>
+
+</body>
+</html>

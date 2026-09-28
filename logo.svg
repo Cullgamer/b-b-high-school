@@ -1,0 +1,59 @@
+
+<svg viewBox="0 0 500 500" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- बाहरी बैकग्राउंड -->
+  <circle cx="250" cy="250" r="245" fill="#FFFFFF" />
+
+  <!-- 1. बाहरी काला रिंग (Outer Black Ring) -->
+  <circle cx="250" cy="250" r="235" fill="#111111" />
+  <circle cx="250" cy="250" r="180" fill="#FFFFFF" />
+
+  <!-- टेक्स्ट के लिए गोल रास्ता (Curved Path for Text) -->
+  <path id="textArcPath" d="M 70, 250 A 180,180 0 1,1 430, 250" fill="none" />
+
+  <!-- 2. गोल घुमावदार स्कूल का नाम -->
+  <text fill="#FFFFFF" font-size="19" font-family="'Arial Black', Arial, sans-serif" font-weight="900" letter-spacing="2.5">
+    <textPath href="#textArcPath" xlink:href="#textArcPath" startOffset="50%" text-anchor="middle">
+      BALASAHEB BHARSKAR HIGH SCHOOL MHAISANG.
+    </textPath>
+  </text>
+
+  <!-- 3. ऊपर और नीचे के संतरी आर्च (Orange Crescents) -->
+  <path d="M 125, 155 C 180, 95 320, 95 375, 155 C 315, 120 185, 120 125, 155 Z" fill="#FF5722" />
+  <path d="M 125, 345 C 180, 405 320, 405 375, 345 C 315, 380 185, 380 125, 345 Z" fill="#FF5722" />
+
+  <!-- 4. बाएँ तरफ़ 'Established : 1970' -->
+  <text x="145" y="250" fill="#111111" font-size="13" font-family="Arial, sans-serif" font-weight="bold" transform="rotate(-90, 145, 250)" text-anchor="middle">
+    Established : 1970
+  </text>
+
+  <!-- 5. बीच का आर्टवर्क (किताब + उगता हुआ सूरज) -->
+  <g transform="translate(185, 195)">
+    <!-- खुली हुई काली किताब -->
+    <path d="M 40, 15 Q 20, 5 0, 15 L 0, 90 Q 20, 80 40, 90 Z" fill="#111111" />
+    <path d="M 40, 15 Q 60, 5 80, 15 L 80, 90 Q 60, 80 40, 90 Z" fill="#111111" />
+    <line x1="40" y1="15" x2="40" y2="90" stroke="#FFFFFF" stroke-width="2" />
+    
+    <!-- किताब के पन्नों पर सफ़ेद लाइन्स -->
+    <line x1="8" y1="30" x2="32" y2="30" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="8" y1="45" x2="32" y2="45" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="8" y1="60" x2="32" y2="60" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="8" y1="75" x2="32" y2="75" stroke="#FFFFFF" stroke-width="2" />
+
+    <line x1="48" y1="30" x2="72" y2="30" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="48" y1="45" x2="72" y2="45" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="48" y1="60" x2="72" y2="60" stroke="#FFFFFF" stroke-width="2" />
+    <line x1="48" y1="75" x2="72" y2="75" stroke="#FFFFFF" stroke-width="2" />
+
+    <!-- उगता हुआ सूरज (Rising Sun) -->
+    <path d="M 82, 22 A 30,30 0 0,1 82, 82 Z" fill="#FF5722" />
+
+    <!-- सूरज की किरणें (Orange Rays) -->
+    <g stroke="#FF5722" stroke-width="4.5" stroke-linecap="round">
+      <line x1="96" y1="20" x2="132" y2="5" />
+      <line x1="105" y1="33" x2="145" y2="22" />
+      <line x1="110" y1="52" x2="152" y2="52" />
+      <line x1="105" y1="70" x2="145" y2="80" />
+      <line x1="96" y1="83" x2="132" y2="98" />
+    </g>
+  </g>
+</svg>

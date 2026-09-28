@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Portal - B.B. High School</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: #f4f7fe;
+      color: #2b3674;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #ffffff;
+      padding: 35px 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(30, 60, 114, 0.15);
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .video-card {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e0e5f2;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: #000000;
+    }
+
+    .video-wrapper iframe, 
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .card-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1b2559;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .badge-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .media-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 20px;
+    }
+
+    .badge-youtube {
+      background: #ffe5e5;
+      color: #e60000;
+    }
+
+    .badge-file {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    .views-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: #707ebe;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-delete {
+      background: #ff4d4f;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-delete:hover {
+      background: #d9363e;
+    }
+
+    .status-box {
+      text-align: center;
+      padding: 50px 20px;
+      font-size: 18px;
+      color: #2a5298;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    @media (max-width: 600px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>📚 Video Portal</h1>
+    <p>B.B. High School - Online Lectures & Video Material</p>
+  </div>
+
+  <div class="container">
+    <div id="statusBox" class="status-box">
+      Loading videos... Please wait ⏳
+    </div>
+
+    <div id="videoGrid" class="video-grid" style="display: none;"></div>
+  </div>
+
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import { 
+      collection, 
+      getDocs, 
+      getDoc, 
+      query, 
+      orderBy,
+      doc,
+      deleteDoc,
+      updateDoc,
+      increment,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { 
+      getAuth, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const auth = getAuth();
+    let currentTeacherData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const qTeacher = query(collection(db, "teachers"), where("uid", "==", user.uid));
+          const teacherSnap = await getDocs(qTeacher);
+
+          if (!teacherSnap.empty) {
+            currentTeacherData = teacherSnap.docs[0].data();
+          } else {
+            window.location.href = "login.html";
+          }
+        } catch (err) {
+          console.error("Teacher Fetch Error:", err);
+        }
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    const videoGrid = document.getElementById("videoGrid");
+    const statusBox = document.getElementById("statusBox");
+
+    async function loadVideos() {
+      try {
+        const q = query(collection(db, "videos_files"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          statusBox.style.display = "block";
+          statusBox.innerHTML = "📂 No videos available right now.";
+          videoGrid.style.display = "none";
+          return;
+        }
+
+        statusBox.style.display = "none";
+        videoGrid.style.display = "grid";
+        videoGrid.innerHTML = "";
+
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const docId = docSnap.id;
+          const views = data.views || 0;
+          const videoCard = createVideoCard(docId, data.name, data.url, data.type, views);
+          videoGrid.appendChild(videoCard);
+        });
+
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        statusBox.innerHTML = "❌ Failed to load videos. Please try again later.";
+      }
+    }
+
+    function createVideoCard(docId, title, url, type, views) {
+      const card = document.createElement("div");
+      card.className = "video-card";
+
+      let mediaHTML = "";
+      let badgeHTML = "";
+
+      if (type === "youtube") {
+        mediaHTML = `
+          <div class="video-wrapper">
+            <iframe 
+              src="${url}" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+              allowfullscreen 
+              loading="lazy">
+            </iframe>
+          </div>
+        `;
+        badgeHTML = `<span class="media-badge badge-youtube">YouTube</span>`;
+      } else {
+        mediaHTML = `
+          <div class="video-wrapper">
+            <video controls preload="metadata">
+              <source src="${url}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        `;
+        badgeHTML = `<span class="media-badge badge-file">Direct Video</span>`;
+      }
+
+      card.innerHTML = `
+        ${mediaHTML}
+        <div class="card-body">
+          <div class="card-title">${title}</div>
+          <div class="card-footer">
+            <div class="badge-container">
+              ${badgeHTML}
+              <span class="views-count">👁️ <span id="view-count-${docId}">${views}</span></span>
+            </div>
+            <button class="btn-delete" data-id="${docId}">🗑️ Delete</button>
+          </div>
+        </div>
+      `;
+
+      let isViewed = false;
+
+      const incrementViewInDB = async (source) => {
+        if (isViewed) return;
+        isViewed = true;
+
+        try {
+          const videoRef = doc(db, "videos_files", docId);
+          await updateDoc(videoRef, {
+            views: increment(1)
+          });
+
+          const viewSpan = card.querySelector(`#view-count-${docId}`);
+          if (viewSpan) {
+            const currentViews = Number(viewSpan.textContent) || 0;
+            viewSpan.textContent = currentViews + 1;
+          }
+        } catch (err) {
+          console.error("❌ View Increment Error:", err);
+          isViewed = false;
+        }
+      };
+
+      if (type === "youtube") {
+        const wrapper = card.querySelector(".video-wrapper");
+        wrapper.addEventListener("mouseenter", () => incrementViewInDB("YouTube MouseEnter"));
+        wrapper.addEventListener("click", () => incrementViewInDB("YouTube Click"));
+        wrapper.addEventListener("touchstart", () => incrementViewInDB("YouTube TouchStart"), { passive: true });
+      } else {
+        const videoElement = card.querySelector("video");
+        if (videoElement) {
+          videoElement.addEventListener("play", () => incrementViewInDB("Direct Video Play"));
+        }
+      }
+
+      const deleteBtn = card.querySelector(".btn-delete");
+      deleteBtn.addEventListener("click", () => deleteVideo(docId));
+
+      return card;
+    }
+
+    // 🗑️ Updated Delete Logic with Cloudinary Support
+    async function deleteVideo(docId) {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+      });
+
+      if (result.isConfirmed) {
+        try {
+          // 1. Fetch document data to check for Cloudinary info
+          const docRef = doc(db, "videos_files", docId);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const publicId = data.publicId || data.public_id;
+            const cloudName = data.cloudName || data.cloud_name;
+
+            // 2. If it has Cloudinary details, delete from Cloudinary via Netlify function
+            if (publicId !== "null" && cloudName !== "null") {
+              const response = await fetch('/.netlify/functions/Cloudnery_delete_Service', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify({ publicId: publicId, accountName: cloudName })
+              });
+              const resData = await response.json();
+              console.log("Cloudinary Delete Response:", resData);
+            }
+          }
+
+          // 3. Delete document from Firestore
+          await deleteDoc(docRef);
+          Swal.fire("Deleted!", "Your video has been deleted.", "success");
+          loadVideos();
+        } catch (error) {
+          console.error("Delete Error:", error);
+          Swal.fire("Error!", "Failed to delete the video.", "error");
+        }
+      }
+    }
+
+    loadVideos();
+
+    document.addEventListener("fullscreenchange", async () => {
+      const fullEl = document.fullscreenElement;
+
+      if (fullEl) {
+        if (fullEl.tagName === "VIDEO") return; 
+
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock("landscape");
+          }
+        } catch (err) {
+          console.log("Orientation lock not supported:", err);
+        }
+
+      } else {
+        try {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        } catch (err) {
+          console.log("Orientation unlock error:", err);
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.B. High School Mhaisang - Teacher Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column; 
+      justify-content: center;
+      align-items: center;  
+      background: linear-gradient(135deg, #e2e8f0 0%, #bbb5d0 100%);
+      padding: 20px 10px;
+    }
+
+    .logo-container { 
+      text-align: center; 
+      margin-bottom: 15px;
+    }
+    
+    .logo-container img {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    .login-card, .signup-card {
+      background: #ffffff;
+      padding: 30px 25px;
+      width: 70%;
+      max-width: 380px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .login-card h2, .signup-card h2 {
+      color: #111;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #FF5722; 
+      padding-bottom: 6px;
+      display: inline-block;
+      letter-spacing: 0.5px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #fdfdfd;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+      border-color: #FF5722;
+      box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15);
+      background: #ffffff;
+    }
+
+    .login-btn, .signup-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #111111; 
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .login-btn:hover, .signup-btn:hover {
+      background-color: #FF5722; 
+    }
+
+    .login-btn:active, .signup-btn:active {
+      transform: scale(0.98);
+    }
+
+    .toggle-link {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .toggle-link a {
+      color: #FF5722;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    .toggle-link a:hover {
+      color: #e0481d;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="logo-container">
+    <img src="logo.svg" alt="School Logo">
+  </div>
+  
+  <!-- LOGIN CARD -->
+  <div class="login-card" id="logincard"> 
+    <h2>TEACHER PORTAL</h2>
+    
+    <form id="teacherloginform">
+      <div class="input-group">
+        <label for="teacherid">Teacher ID</label>
+        <input type="text" id="teacherid" placeholder="@principal" required autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="login-btn">Login</button>
+      <div class="toggle-link">
+        <span>Don't have an account?</span>
+        <a href="#" id="tosignup"> (Sign Up)</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- SIGNUP CARD -->
+  <div class="signup-card" id="signupcard" style="display: none">
+    <h2>TEACHER PORTAL</h2>
+    <form id="teachersignupfrom">
+      <div class="input-group">
+        <label for="teacheridset">Create ID</label>
+        <input type="text" id="teacheridset" placeholder="@ID" required autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label for="passwordset">Password</label>
+        <input type="password" id="passwordset" placeholder="••••••••" required autocomplete="new-password">
+      </div>
+      <div class="input-group">
+        <label for="schoolcode">School Code</label>
+        <input type="password" id="schoolcode" placeholder="••••••••" required>
+      </div>
+      <div class="input-group">
+        <label for="teachername">Full Name</label>
+        <input type="text" id="teachername" placeholder="Name" required>
+      </div>
+      <div class="input-group">
+        <label for="teachersubject">Subject</label>
+        <input type="text" id="teachersubject" placeholder="Subject" required>
+      </div>
+      <button type="submit" class="signup-btn">Sign Up</button>
+      
+      <div class="toggle-link">
+        <span>Already have an account?</span>
+        <a href="#" id="tologin"> (Login)</a>
+      </div>
+    </form>
+  </div>
+
+  <script type="module">
+  import { db } from "./firebase-config.js";
+  import { doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+
+  // 🚩 साइनअप के दौरान ऑटो-लॉगआउट को रोकने के लिए फ़्लैग
+  let isSigningUp = false;
+
+  function formatAuthEmail(id) {
+    const cleanId = id.trim().toLowerCase().replace('@', '');
+    return `${cleanId}@bbhighschool.com`;
+  }
+
+  // 🔒 1. AUTO REDIRECT CHECK VIA FIREBASE AUTH SESSION
+  onAuthStateChanged(auth, async (user) => {
+    // अगर साइनअप चल रहा है तो यह ऑटो-लॉगआउट नहीं करेगा
+    if (user && !isSigningUp) {
+      try {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const querySnap = await getDocs(q);
+
+        if (!querySnap.empty) {
+          const teacherData = querySnap.docs[0].data();
+
+          if (teacherData.status === "approved") {
+            const tid = (teacherData.teacherId || "").toLowerCase();
+            if (tid === "@principal" || tid === "owner" || teacherData.role === "admin") {
+              window.location.href = "principal_home.html";
+            } else {
+              window.location.href = "teacher_home.html";
+            }
+          } else {
+            await signOut(auth); // केवल सामान्य लॉगिन पर पेंडिंग यूज़र लॉगआउट होंगे
+          }
+        }
+      } catch (err) {
+        console.error("Auth Session Error:", err);
+      }
+    }
+  });
+
+  const loginForm = document.getElementById("teacherloginform");
+  const signForm = document.getElementById("teachersignupfrom");
+  const tosignup = document.getElementById("tosignup");
+  const tologin = document.getElementById("tologin");
+  const logincard = document.getElementById("logincard");
+  const signupcard = document.getElementById("signupcard");
+
+  // 🔑 2. FIREBASE AUTH LOGIN LOGIC
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const teacherid = document.getElementById('teacherid').value.trim();
+    const password = document.getElementById('password').value;
+    const authEmail = formatAuthEmail(teacherid);
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
+      const user = userCredential.user;
+
+      const docRef = doc(db, "teachers", teacherid);
+      let docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const qSnap = await getDocs(q);
+        if (!qSnap.empty) docSnap = qSnap.docs[0];
+      }
+
+      if (!docSnap.exists()) {
+        await signOut(auth);
+        Swal.fire({
+          title: 'Invalid ID!',
+          text: 'This is not a valid teacher ID.',
+          icon: 'error',
+          confirmButtonColor: '#FF5722'
+        });
+        return;
+      }
+
+      const teacherData = docSnap.data();
+
+      if (teacherData.status !== "approved") {
+        await signOut(auth);
+        Swal.fire({
+          title: 'Account Pending!',
+          text: 'Your account is pending, please wait for principal approval.',
+          icon: 'warning',
+          confirmButtonColor: '#FF5722'
+        });
+        return;
+      }
+
+      await Swal.fire({
+        title: 'Welcome!',
+        text: "Successfully logged in. Welcome " + teacherData.fullName,
+        icon: 'success',
+        confirmButtonColor: '#FF5722'
+      });
+
+      const tid = (teacherData.teacherId || teacherid).toLowerCase();
+      if (tid === "@principal" || tid === "owner" || teacherData.role === "admin") {
+        window.location.href = "principal_home.html";
+      } else {
+        window.location.href = "teacher_home.html";
+      }
+
+    } catch (error) {
+      console.error("Login Error:", error);
+      let errorMsg = 'Something went wrong during login.';
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        errorMsg = 'Incorrect Teacher ID or Password.';
+      }
+      Swal.fire({
+        title: 'Login Error!',
+        text: errorMsg,
+        icon: 'error',
+        confirmButtonColor: '#FF5722'
+      });
+    }
+  });
+
+  // 📝 3. FIREBASE AUTH SIGNUP LOGIC
+  signForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const teacherid = document.getElementById('teacheridset').value.trim();
+    const passwordset = document.getElementById('passwordset').value;
+    const schoolcode = document.getElementById('schoolcode').value;
+    const teachername = document.getElementById('teachername').value;
+    const teachersubject = document.getElementById('teachersubject').value;
+
+    await registerTeacher(teacherid, passwordset, schoolcode, teachername, teachersubject);
+  });
+
+  async function registerTeacher(teacherid, password, schoolcode, teachername, teachersubject) {
+    console.log("🚀 [1/8] registerTeacher स्टार्ट हुआ. ID:", teacherid);
+
+    if (schoolcode !== "SCHOOL2026") {
+      console.warn("⚠️ ग़लत स्कूल कोड दर्ज किया गया।");
+      Swal.fire({
+        title: 'Wrong School Code!',
+        text: 'Your school code is incorrect.',
+        icon: 'error',
+        confirmButtonColor: '#FF5722'
+      });
+      return; 
+    }
+
+    // 🚩 साइनअप मोड ऑन
+    isSigningUp = true;
+
+    try {
+      console.log("🔍 [2/8] Firestore में टीचर ID चेक हो रही है...");
+      const docRef = doc(db, "teachers", teacherid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.warn("⚠️ टीचर ID डेटाबेस में पहले से मौजूद है।");
+        Swal.fire({
+          title: 'ID Exists!',
+          text: 'This Teacher ID already exists.',
+          icon: 'warning',
+          confirmButtonColor: '#FF5722'
+        });
+        isSigningUp = false;
+        return;
+      }
+
+      const authEmail = formatAuthEmail(teacherid);
+      console.log("🔑 [3/8] Firebase Auth में यूज़र बनाया जा रहा है... Email:", authEmail);
+
+      const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
+      const user = userCredential.user;
+      console.log("✅ [4/8] Auth यूज़र बन गया! UID:", user.uid);
+
+      console.log("💾 [5/8] Firestore में टीचर डेटा सेव हो रहा है...");
+      await setDoc(doc(db, "teachers", teacherid), {
+        uid: user.uid,
+        teacherId: teacherid,
+        fullName: teachername,
+        subject: teachersubject,
+        role: (teacherid.toLowerCase() === "@principal" || teacherid.toLowerCase() === "owner") ? "admin" : "teacher",
+        status: "pending",
+        registeredAt: new Date().toISOString()
+      });
+      console.log("✅ [6/8] Firestore डेटा सफलतापूर्वक सेव हो गया!");
+
+      console.log("🔔 [7/8] SweetAlert पॉपअप ट्रिगर हो रहा है...");
+      await Swal.fire({
+        title: 'Signup Successful!',
+        text: "Sign up successful, waiting for principal's approval.",
+        icon: 'success',
+        confirmButtonColor: '#FF5722'
+      });
+      console.log("✅ यूज़र ने SweetAlert ओके दबा दिया!");
+
+      console.log("🧹 [8/8] फॉर्म रीसेट, signOut और लॉगिन कार्ड ओपन हो रहा है...");
+      signForm.reset();
+      await signOut(auth);
+      openLogin();
+      console.log("🎉 पूरी प्रक्रिया सफलतापूर्वक समाप्त हुई!");
+
+    } catch (error) {
+      console.error("❌ Catch Block में एरर आया:", error);
+      let errorMsg = 'Signing up is not possible right now.';
+      if (error.code === 'auth/weak-password') {
+        errorMsg = 'Password should be at least 6 characters.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMsg = 'This ID is already registered in Firebase Auth.';
+      }
+
+      console.log("🔔 एरर वाला SweetAlert ट्रिगर हो रहा है...");
+      Swal.fire({
+        title: 'Signup Error!',
+        text: `${errorMsg} (${error.message})`,
+        icon: 'error',
+        confirmButtonColor: '#FF5722'
+      });
+    } finally {
+      // 🚩 साइनअप पूरा होने पर फ़्लैग रीसेट
+      isSigningUp = false;
+    }
+  }
+
+  tosignup.addEventListener("click", (e) => { 
+    e.preventDefault();
+    logincard.style.display = 'none';
+    signupcard.style.display = 'block';
+  });
+
+  tologin.addEventListener("click", (e) => { 
+    e.preventDefault();
+    logincard.style.display = 'block';
+    signupcard.style.display = 'none';
+  });
+
+  function openLogin() {
+    logincard.style.display = 'block';
+    signupcard.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>

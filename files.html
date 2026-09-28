@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.B. High School - File Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  
+  <style>
+    /* 🎨 Global Reset & Fonts */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      padding-bottom: 40px;
+    }
+
+    /* 🏛️ Header Design */
+    .header {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    /* 📦 Main Layout Container */
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    /* 💳 Card Components */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e1e8ed;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 📤 Upload Form Styling */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #444;
+    }
+
+    .form-group input, 
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus {
+      border-color: #2a5298;
+    }
+
+    .btn-upload {
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn-upload:hover {
+      background-color: #218838;
+    }
+
+    /* 🏷️ Section Headers & Badges */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge-private {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .badge-public {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    /* 📄 File List & Items */
+    ./* 📄 File List & Items (Mobile Perfect) */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  gap: 10px; /* एलिमेंट आपस में चिपके नहीं */
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1; /* बची हुई सारी जगह लेगा */
+  min-width: 0; /* ओवरफ़्लो को रोकेगा */
+}
+
+.file-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c3e50;
+  word-break: break-word; /* लंबा नाम होने पर स्क्रीन से बाहर नहीं भागेगा */
+}
+
+.btn-view {
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap; /* बटन का टेक्स्ट टूटेगा नहीं */
+  flex-shrink: 0; /* बटन कभी छोटा या टेढ़ा नहीं होगा */
+  text-align: center;
+}
+
+.btn-view:hover {
+  background-color: #0056b3;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- 🏛️ हेडर (स्कूल का नाम) -->
+  <header class="header">
+    <h1>B.B. HIGH SCHOOL</h1>
+    <p>Teacher Portal - Document & Resource Hub</p>
+  </header>
+
+  <div class="container">
+
+    <!-- 📤 फ़ाइल अपलोड सेक्शन -->
+    <div class="card">
+      <h2>📤Upload new file</h2></h2>
+      <form id="fileUploadForm">
+        <div class="form-group">
+          <label for="fileTitle">File name title</label>
+          <input type="text" id="fileTitle" placeholder=
+          "Ex: Class 10th Science Paper" required>
+        </div>
+
+        <div class="form-group">
+          <label for="accessType">which category you choose?</label>
+          <select id="accessType" required>
+            <option value="private">🔒 Private Storage (only principal/authorised person)</option>
+            <option value="public">📢 Student Resource (published for students)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fileInput">File (PDF / Photo / ZIP)</label>
+          <input type="file" id="fileInput" required>
+        </div>
+
+        <button type="submit" class="btn-upload">Upload 🚀</button>
+      </form>
+    </div>
+
+<div class="card" style="margin-bottom: 20px;">
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="🔍 Search file by name..." 
+    style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; outline: none;"
+  />
+</div>
+
+<!-- 1️⃣ PRIVATE STORAGE -->
+<div class="card">
+  <div class="section-header">
+    <h2>🔒 Private Storage</h2>
+    <span class="badge badge-private">only admin/staff</span>
+  </div>
+  
+  <div id="privateFileList" class="file-list">
+    <!-- JS से फ़ाइलें यहाँ लोड होंगी -->
+  </div>
+</div>
+
+<!-- 2️⃣ PUBLIC / STUDENT RESOURCES -->
+<div class="card">
+  <div class="section-header">
+    <h2>📢 Student Resources</h2>
+    <span class="badge badge-public">public / student portal</span>
+  </div>
+
+  <div id="publicFileList" class="file-list">
+    <!-- JS से फ़ाइलें यहाँ लोड होंगी -->
+  </div>
+</div>
+  <script type="module">
+  import { db } from "./firebase-config.js";
+  import { uploadToCloudinary } from "./cloudinaryService.js";
+  import { 
+    doc, getDoc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot, where, getDocs, serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  
+  // 🔐 Firebase Auth Modules Import
+  import { 
+    getAuth, onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+  let currentTeacherData = null;
+
+  // 🔒 1. FIREBASE AUTH SESSION CHECK (No localStorage)
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const qTeacher = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const teacherSnap = await getDocs(qTeacher);
+
+        if (!teacherSnap.empty) {
+          currentTeacherData = teacherSnap.docs[0].data();
+        } else {
+          // अगर Teacher डेटा नहीं मिलता है तो Login पेज पर redirect करो
+          window.location.href = "login.html";
+        }
+      } catch (err) {
+        console.error("Teacher Fetch Error:", err);
+      }
+    } else {
+      // अगर User Logged in नहीं है तो Login पर भेजो
+      window.location.href = "index.html";
+    }
+  });
+
+
+  // 📤 File Upload Handler
+  const fileUploadForm = document.getElementById("fileUploadForm");
+  fileUploadForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user || !currentTeacherData) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'You must be logged in to upload files.',
+        icon: 'error',
+        confirmButtonColor: '#b83b19'
+      });
+      return;
+    }
+
+    const accessType = document.getElementById("accessType").value;
+    const rawTitle = document.getElementById("fileTitle").value;
+    const fileTitleId = rawTitle.trim().toLowerCase();
+    const fileInput = document.getElementById("fileInput").files[0];
+
+    // Auth Session + Firestore रिकॉर्ड से टीचर की डिटेल्स
+    const teacherName = currentTeacherData.fullName || "Teacher";
+    const teacherId = currentTeacherData.teacherId || user.uid;
+
+    let uploadResult = { fileUrl: null, publicId: null };
+    let originalFileName = null;
+
+    try {
+      const fileDocRef = doc(db, "files", fileTitleId);
+      const docSnap = await getDoc(fileDocRef);
+
+      if (docSnap.exists()) {
+        Swal.fire({
+          title: 'File Already Exists!',
+          text: 'This file title is already taken. Please use a unique title.',
+          icon: 'warning',
+          confirmButtonColor: '#b83b19'
+        });
+        return;
+      }
+
+      if (fileInput) {
+        Swal.fire({
+          title: 'Uploading to cloud...',
+          text: 'Please wait while the file is uploading',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+        originalFileName = fileInput.name;
+        console.log("Cloudinary upload starting...");
+        uploadResult = await uploadToCloudinary(fileInput);
+      }
+
+      await setDoc(fileDocRef, {
+        title: rawTitle,
+        titleId: fileTitleId,
+        originalFileName: originalFileName,
+        uploadedBy: teacherName,
+        uploadedById: teacherId,
+        fileUrl: uploadResult.fileUrl,
+        cloudName: uploadResult.cloudName,
+        publicId: uploadResult.publicId,
+        accessType: accessType,
+        timestamp: serverTimestamp()
+      });
+
+      Swal.fire({
+        title: 'Success!',
+        text: 'File uploaded successfully!',
+        icon: 'success',
+        confirmButtonColor: '#b83b19'
+      });
+
+      fileUploadForm.reset();
+
+    } catch (error) {
+      console.error("Upload error:", error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Uploading failed, please try again later!',
+        icon: 'error',
+        confirmButtonColor: '#b83b19'
+      });
+    }
+  });
+
+  let loadedFiles = [];
+
+  const searchInput = document.getElementById("searchInput");
+  const privateContainer = document.getElementById("privateFileList");
+  const publicContainer = document.getElementById("publicFileList");
+
+  // 🖼️ UI Render Function
+  function renderFiles(filterText = "") {
+    privateContainer.innerHTML = "";
+    publicContainer.innerHTML = "";
+
+    const cleanFilter = filterText.toLowerCase().trim();
+
+    loadedFiles.forEach((file) => {
+      const fileName = (file.title || "").toLowerCase();
+
+      if (fileName.includes(cleanFilter)) {
+        const dateObj = file.timestamp ? file.timestamp.toDate() : new Date();
+        const formattedDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        const fileHTML = `
+          <div class="file-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+            <div class="file-info" style="display: flex; align-items: center; gap: 10px;">
+              <span class="file-icon" style="font-size: 20px;">📄</span>
+              <div>
+                <div class="file-name" style="font-weight: bold; color: #333;">${file.title}</div>
+                <div class="file-date" style="font-size: 12px; color: #777;">${formattedDate}</div>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+              <a href="${file.fileUrl}" target="_blank" download class="btn-view" style="background: #007bff; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px;">view / download</a>
+              
+             <button onclick="deleteFile('${file.id}', '${file.publicId}', '${file.cloudName}')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">🗑️ Delete</button>
+
+            </div>
+          </div>
+        `;
+
+        if (file.accessType && file.accessType.toLowerCase().includes("private")) {
+          privateContainer.innerHTML += fileHTML;
+        } else {
+          publicContainer.innerHTML += fileHTML;
+        }
+      }
+    });
+
+    if (privateContainer.innerHTML === "") {
+      privateContainer.innerHTML = `<p style="color: #888; font-size: 13px; padding: 10px;">No private files found.</p>`;
+    }
+    if (publicContainer.innerHTML === "") {
+      publicContainer.innerHTML = `<p style="color: #888; font-size: 13px; padding: 10px;">No student resources found.</p>`;
+    }
+  }
+
+  // 📡 Real-time Listener
+  const q = query(collection(db, "files"), orderBy("timestamp", "desc"));
+  onSnapshot(q, (snapshot) => {
+    loadedFiles = [];
+    snapshot.forEach((docSnap) => {
+      loadedFiles.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    loadedFiles.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+    renderFiles(searchInput.value);
+  });
+
+  // 🗑️ Delete File Function
+  window.deleteFile = async function(fileId , publicId , accountName) {
+    const confirmResult = await Swal.fire({
+      title: 'Are you sure?',
+      text: "This file will be permanently deleted!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirmResult.isConfirmed) {
+      try {
+        await deleteDoc(doc(db, "files", fileId));
+        cloudinaryDelete(publicId , accountName )
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'File has been deleted successfully.',
+          icon: 'success',
+          confirmButtonColor: '#b83b19'
+        });
+        
+      } catch (error) {
+        console.error("Delete error:", error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to delete the file.',
+          icon: 'error',
+          confirmButtonColor: '#b83b19'
+        });
+      }
+    }
+  };
+  async function cloudinaryDelete(publicId, accountName) {
+    try {
+        const response = await fetch('/.netlify/functions/Cloudnery_delete_Service', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ publicId: publicId, accountName: accountName })
+        });
+
+        const data = await response.json();
+        console.log("Server ka jawab:", data);
+        alert("File delete ho gayi bhai!");
+    } catch (err) {
+        console.error("Request fail ho gayi:", err);
+    }
+}
+
+
+  searchInput.addEventListener("input", (e) => {
+    renderFiles(e.target.value);
+  });
+</script>
+
+</body>
+</html>

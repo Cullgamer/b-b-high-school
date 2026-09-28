@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.B. High School</title>
+  
+  <!-- Manifest Link -->
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- 🎨 CSS लिंक -->
+  <link rel="stylesheet" href="student-style.css">
+  
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <div class="student-header">
+    <h1>🏫 B.B. HIGH SCHOOL</h1>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <a href="notice.html" class="tab-btn active">📌 notice Bord <a>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container" id="noticeList">
+    <!-- Firestore से नोटिस यहाँ लोड होंगे -->
+    <div class="card">
+      <div class="card-title">Loading notices...</div>
+    </div>
+  </div>
+
+<script type="module">
+  import { db,  } from "./firebase-config.js";
+  import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+ import { 
+    getAuth, onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+  let currentTeacherData = null;
+
+  // 🔒 1. FIREBASE AUTH SESSION CHECK
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const querySnap = await getDocs(q);
+
+        if (!querySnap.empty) {
+          currentTeacherData = querySnap.docs[0].data();
+        } else {
+          window.location.href = "index.html";
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+      }
+    } else {
+      // अगर लॉगिन नहीं है तो सीधे लॉगिन पेज पर भेज दो
+      window.location.href = "index.html";
+    }
+  });
+
+
+  const noticeList = document.getElementById("noticeList");
+
+  // 1️⃣ Firestore - Real-time Notices Engine
+  const q = query(collection(db, "notices"), orderBy("timestamp", "desc"));
+
+  onSnapshot(q, (snapshot) => {
+    noticeList.innerHTML = ""; // Refresh UI list
+
+    if (snapshot.empty) {
+      noticeList.innerHTML = `<div class="card"><div class="card-title">No notices available.</div></div>`;
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const noticeId = docSnap.id;
+
+      let formattedDate = "";
+      if (data.timestamp) {
+        formattedDate = data.timestamp.toDate().toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
+
+      let fileHTML = "";
+      if (data.fileUrl) {
+        if (data.fileType && data.fileType.startsWith("image/")) {
+          fileHTML = `<img src="${data.fileUrl}" style="width:100%; max-height:300px; object-fit:contain; background:#f8f9fa; border-radius:8px; margin-top:10px; border:1px solid #eee;">`;
+        } else {
+          fileHTML = `<a href="${data.fileUrl}" target="_blank" style="display:inline-block; margin-top:10px; padding:8px 12px; background:#FF5722; color:white; text-decoration:none; border-radius:5px; font-size:13px; font-weight:bold;">📄 View Attachment</a>`;
+        }
+      }
+
+      noticeList.innerHTML += `
+        <div style="background:#fff; border-radius:12px; padding:16px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #FF5722;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:16px; font-weight:bold; color:#111;">${data.title}</div>
+            <span style="font-size:11px; color:#888;">${formattedDate}</span>
+            <button class="btn-delete" data-id="${noticeId}">🗑️ Delete</button>
+          </div>
+          
+          <div style="margin-top:6px; font-size:13px; color:#555; line-height:1.4;">${data.desc || ""}</div>
+          ${fileHTML}
+        </div>
+      `;
+      
+    });
+  });
+  
+
+
+// 🗑️ Delete Option Event Listener
+noticeList.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("btn-delete")) {
+    const id = e.target.getAttribute("data-id");
+
+    // Confirmation dialog with SweetAlert2
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "This notice will be permanently deleted!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // Delete from Firestore
+        await deleteDoc(doc(db, "notices", id));
+        Swal.fire('Deleted!', 'The notice has been successfully deleted.', 'success');
+      } catch (error) {
+        console.error("Error deleting notice: ", error);
+        Swal.fire('Error!', 'Failed to delete the notice.', 'error');
+      }
+    }
+  }
+});
+
+
+</script>
+
+</body>
+</html>

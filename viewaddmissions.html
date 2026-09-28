@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Admission Forms Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 12px;
+        }
+
+        .header-section h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .filter-box select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+            outline: none;
+            background-color: #fff;
+            cursor: pointer;
+        }
+         .action-btns { display: flex; gap: 10px; margin-top: 12px; }
+    
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .approve-btn { background-color: #28a745; color: white; }
+    .approve-btn:active { transform: scale(0.95); }
+
+    .delete-btn { background-color: #dc3545; color: white; }
+    .delete-btn:active { transform: scale(0.95); }
+
+        #admissionListContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .box{
+           background: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px
+        }
+.student-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-info {
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .card-info h4 {
+            color: #c93b2b;
+            margin-bottom: 6px;
+            font-size: 1.1rem;
+        }
+
+        .card-info p {
+            margin: 3px 0;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-approve {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-approve:hover {
+            background-color: #1b5e20;
+        }
+
+        .btn-reject {
+            background-color: #c62828;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-reject:hover {
+            background-color: #b71c1c;
+        }
+
+        .loading-text, .empty-text {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+    
+        <div class="header-section">
+            <h2>🎓 Admission Applications</h2>
+            <div class="filter-box">
+                <select id="yearFilter">
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+            </div>
+            
+            <div class="filter-box">
+                <select id="status">
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                </select>
+            </div>
+        </div>
+
+        
+        <div id="admissionListContainer">
+            <div class="loading-text">Fetching records...</div>
+        </div>
+    </div>
+  <script type="module">
+      import { db } from "./firebase-config.js";
+      import { 
+        addDoc, serverTimestamp, collection, query, orderBy, where, getDocs, onSnapshot, deleteDoc, doc, updateDoc
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      // 🔐 Firebase Auth Imports
+      import { 
+        getAuth, onAuthStateChanged 
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+      const auth = getAuth();
+      let currentTeacherData = null;
+
+      // 🔒 1. FIREBASE AUTH SESSION CHECK
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+            const querySnap = await getDocs(q);
+
+            if (!querySnap.empty) {
+              currentTeacherData = querySnap.docs[0].data();
+            } else {
+              window.location.href = "index.html";
+            }
+          } catch (err) {
+            console.error("Auth check error:", err);
+          }
+        } else {
+          window.location.href = "index.html";
+        }
+      });
+
+      function loadAdmissionForms() {
+           const selectedyear = document.getElementById("yearFilter").value;
+           const selectedStatus = document.getElementById("status") ? document.getElementById("status").value : "pending";
+           
+           const container = document.getElementById("admissionListContainer");
+           container.innerHTML = "<p style='font-size: 0.9rem; color: #666;'>Fetching records...</p>";
+           
+           try {
+             const q = query(collection(db, "admissionForms"), orderBy("createdAt", "desc"));
+
+             onSnapshot(q, (studentdata) => {
+                 container.innerHTML = ""; 
+
+                 if (studentdata.empty) {
+                     container.innerHTML = "<p style='font-size: 0.9rem; color: #666;'>No submissions found.</p>";
+                     return;
+                 }
+
+                 let htmlContent = "";
+                 let count = 0;
+
+                 studentdata.forEach((docSnap) => {
+                     const data = docSnap.data();
+                     let submissionDate = data.createdAt ? data.createdAt.toDate() : new Date();
+                     let formYear = submissionDate.getFullYear().toString();
+                     let formStatus = data.status || "pending";
+                     let approveButtonHTML = "";
+
+if (formStatus === "pending") {
+    approveButtonHTML = `<button class="approve-btn" onclick="window.approveStudent('${docSnap.id}', '${data.mobileNumber}')">Approve</button>`;
+} else {
+
+    approveButtonHTML = `<span style="color: green; font-weight: bold; font-size: 0.85rem;">✔ Approved</span>`;
+}
+                
+                     if (formYear === selectedyear && formStatus === selectedStatus) {
+                         count++;
+
+                         htmlContent += `
+                         <div class="box">
+                             <div class="student-card" data-id="${docSnap.id}">
+                                 <div class="card-info" style="cursor: pointer;" onclick="window.location.href='detail.html?id=${docSnap.id}'">
+                                     <h4 style="color: #c93b2b;">🎓 ${data.studentName}</h4>
+                                     <p style="font-size: 0.85rem; color: #444;">Class: ${data.admissionClass}th | Mobile: ${data.mobileNumber}</p>
+                                 </div>
+                             </div>
+                              <div class="action-btns">
+                     ${approveButtonHTML}
+                             <button class="delete-btn" onclick="window.deleteStudent('${docSnap.id}')">Delete</button>
+                           </div>
+                           </div>
+                         `;
+                     }
+                 });
+                 
+
+                 if (count === 0) {
+                     container.innerHTML = `<p style='font-size: 0.9rem; color: #666;'>No applications found.</p>`;
+                 } else {
+                     container.innerHTML = htmlContent;
+                 }
+
+                 document.querySelectorAll(".student-card").forEach(card => {
+                     card.addEventListener("click", () => {
+                         const studentId = card.getAttribute("data-id");
+                         window.location.href = `detail.html?id=${studentId}`;
+                     });
+                 });
+             });
+             
+           } catch (error) {
+            console.error("Error loading data:", error);
+            container.innerHTML = "<p style='font-size: 0.9rem; color: red;'>Failed to load records.</p>";
+          }
+      }
+
+        window.addEventListener("DOMContentLoaded", () => {
+          loadAdmissionForms();
+      });
+
+     
+      window.addEventListener("pageshow", (event) => {
+         
+          if (event.persisted) {
+              loadAdmissionForms();
+          }
+      });
+
+      
+      document.getElementById("yearFilter").addEventListener("change", loadAdmissionForms);
+      document.getElementById("status").addEventListener("change", loadAdmissionForms);
+      window.deleteStudent = async function(studentId){
+          const confirmResult = await Swal.fire({
+            title: 'Delete Request?',
+            text: 'you sure about it!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Delete!'
+          });
+          if (confirmResult.isConfirmed){
+              try {
+                  await deleteDoc(doc(db, "admissionForms", studentId));
+              } catch (err) {
+                  console.log("kuchh gadbad hai yaar", err);
+              }
+          }
+      }
+
+      window.approveStudent = async function(studentId, mobileNum) {
+          try {
+              await updateDoc(doc(db, "admissionForms", studentId), { status: "approved" });
+          } catch (err) {
+              console.log("agfx", err);
+          }
+          const message = "Congratulations! Your admission form has been approved.";
+          window.open(`https://wa.me/91${mobileNum}?text=${encodeURIComponent(message)}`, '_blank');
+      };
+  </script>
+
+</body>
+</html>

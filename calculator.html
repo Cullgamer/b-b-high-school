@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Calculator</title>
+  <script src="bignumber.min.js"></script>
+  <script src="cullcalc.js" defer></script> 
+
+  <style>
+    /* CSS Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      min-height: 100vh;
+      color: #ffffff;
+    }
+
+    /* 🎯 Header Main Design */
+    .app-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    /* Left Group: Logo + Title + Badge */
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* 🖼️ Logo & Brand Section */
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    .brand-logo img {
+      width: 45px;
+      height: 45px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      color: #f8fafc;
+    }
+
+    /* Credit Badge CSS */
+    .developer-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background: rgba(0, 255, 136, 0.08);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .badge-text {
+      font-size: 9px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #00ff88; /* Neon Gamer Green */
+    }
+
+    /* 🔢 Input & Result Area */
+    .header-input-div {
+      flex: 1;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .calc-input {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.07);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      outline: none;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+    }
+
+    .calc-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 400;
+      font-size: 13px;
+    }
+
+    .calc-input:focus {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #00ff88;
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
+    }
+
+    /* 🎯 Result Styling */
+    .calc-result {
+      font-size: 16px;
+      font-weight: 700;
+      color: #00ff88;
+      padding-left: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 📱 Mobile Responsive */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .brand-section {
+        justify-content: space-between;
+      }
+
+      .header-input-div {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Component Starts -->
+  <header class="app-header">
+    <div class="header-container">
+      
+      <!-- Brand Section (Logo + Title + Badge) -->
+      <div class="brand-section">
+        <a href="#" class="brand-logo">
+          <img src="logo.png" alt="Calculator Logo">
+          <span class="brand-name">Smart Calculator</span>
+        </a>
+
+        <!-- Developer Credit Badge -->
+        <div class="developer-badge">
+          <span class="badge-text">Engineered by</span>
+          <span class="badge-name">Rohan Manker (Cullgamer)</span>
+           <span class="badge-text">Work on</span>
+          <span class="badge-name">Cullcalc Engine</span>
+        </div>
+      </div>
+
+      <!-- Equation Input & Result Div -->
+      <div class="header-input-div">
+        <input 
+          type="text" 
+          id="calcInput" 
+          class="calc-input" 
+          placeholder="write an equation" 
+          autocomplete="off">
+        <div id="calcResult" class="calc-result">= 0</div>
+      </div>
+
+    </div>
+  </header>
+
+  <script>
+    const input = document.getElementById("calcInput");
+    const cResult = document.getElementById("calcResult");
+
+    input.addEventListener("input", (e) => {
+      // सीधा CullCalc से रिजल्ट सेट करना
+      let result = CullCalc(e.target.value);
+      cResult.innerText = "= " + result;
+    });
+  </script>
+
+</body>
+</html>

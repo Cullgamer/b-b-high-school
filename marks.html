@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.B. High School - Marks Entry</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      padding-bottom: 40px;
+    }
+
+    /* 🏛️ Header */
+    .header {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    /* 📦 Main Container */
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e1e8ed;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #1e3c72;
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    .form-group input, 
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus {
+      border-color: #2a5298;
+    }
+
+    /* 📚 Grid for Subject Marks */
+    .subject-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      margin-top: 15px;
+    }
+
+    .btn-save {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    .btn-save:hover {
+      background-color: #0056b3;
+    }
+
+    .note-text {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🏛️ Header -->
+  <header class="header">
+    <h1>B.B. HIGH SCHOOL</h1>
+    <p>Teacher Portal - Student Marks Update</p>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>📊 Update Student Marks</h2>
+
+      <form id="marksForm">
+        <!-- 1. Select Class (Only 8th, 9th, 10th) -->
+        <div class="form-group">
+          <label for="studentClass">Select Class *</label>
+          <select id="studentClass" required>
+            <option value="">-- Select Class --</option>
+            <option value="8">Class 8th</option>
+            <option value="9">Class 9th</option>
+            <option value="10">Class 10th</option>
+          </select>
+        </div>
+
+        <!-- 2. Roll Number -->
+        <div class="form-group">
+          <label for="rollNo">Roll Number *</label>
+          <input type="number" id="rollNo" placeholder="e.g. 15" required>
+        </div>
+
+        <!-- 3. Student Name (Optional) -->
+        <div class="form-group">
+          <label for="studentName">Student Name <span class="note-text">(Optional)</span></label>
+          <input type="text" id="studentName" placeholder="e.g. Rohan mankar">
+        </div>
+
+        <!-- 4. Subject Marks Grid -->
+        <label style="font-size: 14px; font-weight: 600; color: #444;">Subject Marks:</label>
+        <p class="note-text" style="margin-bottom: 8px;">* Fill only the subjects you want to update. You can leave the rest blank.</p>
+        
+        <div class="subject-grid">
+          <div class="form-group">
+            <label for="maths">Mathematics</label>
+            <input type="text" id="maths" inputmode="tel" placeholder="85/100 or 85">
+          </div>
+
+          <div class="form-group">
+            <label for="science">Science</label>
+            <input type="text" id="science" inputmode="tel" placeholder="Enter marks">
+          </div>
+
+          <div class="form-group">
+            <label for="english">English</label>
+            <input type="text" id="english" inputmode="tel"  placeholder="Enter marks">
+          </div>
+
+          <div class="form-group">
+            <label for="social">Social Science</label>
+            <input type="text" id="social" inputmode="tel"  placeholder="Enter marks">
+          </div>
+          <div class="form-group">
+            <label for="Marthi">Marthi</label>
+            <input type="text" id="Marthi" inputmode="tel" placeholder="Enter marks">
+          </div>
+          <div class="form-group">
+            <label for="Hindi">Hindi</label>
+            <input type="text" id="Hindi" inputmode="tel" placeholder="Enter marks">
+          </div>
+          <div class="form-group">
+            <label for="History">History</label>
+            <input type="text" id="History" inputmode="tel" placeholder="Enter marks">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-save">Save / Update Marks 💾</button>
+      </form>
+    </div>
+  </div>
+<script type="module">
+  import { db } from "./firebase-config.js";
+  import { 
+    doc, setDoc, query, collection, where, getDocs, serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 🔐 Firebase Auth Imports
+  import { 
+    getAuth, onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const auth = getAuth();
+  let currentTeacherData = null;
+
+  // 🔒 1. FIREBASE AUTH SESSION CHECK
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        const querySnap = await getDocs(q);
+
+        if (!querySnap.empty) {
+          currentTeacherData = querySnap.docs[0].data();
+        } else {
+          window.location.href = "login.html";
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+      }
+    } else {
+      // अगर लॉगिन नहीं है तो सीधे लॉगिन पेज पर भेज दो
+      window.location.href = "login.html";
+    }
+  });
+
+    // 2. Marks Form Submit Handler
+  const marksForm = document.getElementById("marksForm");
+  
+  marksForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user || !currentTeacherData) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'You must be logged in to update marks.',
+        icon: 'error',
+        confirmButtonColor: '#FF5722'
+      });
+      return;
+    }
+
+    const studentClass = document.getElementById("studentClass").value;
+    const rollNo = document.getElementById("rollNo").value.trim();
+    const studentName = document.getElementById("studentName").value.trim();
+    
+    const maths = document.getElementById("maths").value.trim();
+    const science = document.getElementById("science").value.trim();
+    const english = document.getElementById("english").value.trim();
+    const social = document.getElementById("social").value.trim();
+    const Marthi = document.getElementById("Marthi").value.trim();
+    const Hindi = document.getElementById("Hindi").value.trim();
+    const History = document.getElementById("History").value.trim();
+
+    let marksData = {
+      updatedBy: currentTeacherData.fullName || "Teacher",
+      updatedById: currentTeacherData.teacherId || user.uid,
+      updatedAt: serverTimestamp()
+    };
+
+    if (studentName !== "") marksData.studentName = studentName;
+    
+    // 🛑 FIX: Number() हटा दिया है ताकि "85/100" बिना NaN बने String मेंFirestore में जाए
+    if (maths !== "") marksData.maths = maths;
+    if (science !== "") marksData.science = science;
+    if (english !== "") marksData.english = english;
+    if (social !== "") marksData.social = social;
+    if (Marthi !== "") marksData.marathi = Marthi;
+    if (Hindi !== "") marksData.hindi = Hindi;
+    if (History !== "") marksData.history = History;
+
+    const studentId = `${studentClass}_${rollNo}`;
+
+    try {
+      await setDoc(doc(db, "marks", studentId), marksData, { merge: true });
+
+      await Swal.fire({
+        title: 'Data Saved!',
+        text: `Marks updated successfully for Class ${studentClass}, Roll No. ${rollNo}.`,
+        icon: 'success',
+        confirmButtonColor: '#FF5722'
+      });
+
+      marksForm.reset();
+
+    } catch (error) {
+      console.error("Data Save Error:", error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to save data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#FF5722'
+      });
+    }
+  });
+
+</script>
+</body>
+</html>
+

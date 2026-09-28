@@ -1,0 +1,48 @@
+/* brand.css */
+.brand-credit-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 30px auto;
+    padding: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    width: fit-content;
+}
+
+.brand-monogram-logo {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #2c3e50, #c93b2b);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(201, 59, 43, 0.25);
+    transform: rotate(-5deg);
+}
+
+.brand-monogram-logo span {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.c-letter { color: #ffffff; }
+.g-letter { color: #ffcc00; }
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.brand-subtitle {
+    font-size: 0.7rem;
+    color: #777777;
+}
