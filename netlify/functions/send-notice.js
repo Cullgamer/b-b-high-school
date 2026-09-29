@@ -1,7 +1,9 @@
 const admin = require('firebase-admin');
+let rawPrivateKey = process.env.FIREBASE_PRIVATE_KEY_B64 || '';
+rawPrivateKey = rawPrivateKey.trim().replace(/^["']|["']$/g, ''); 
 
-const privateKey = process.env.FIREBASE_PRIVATE_KEY_B64
-  ? Buffer.from(process.env.FIREBASE_PRIVATE_KEY_B64, 'base64').toString('utf8')
+const privateKey = rawPrivateKey
+  ? Buffer.from(rawPrivateKey, 'base64').toString('utf8')
   : undefined;
 
 if (!admin.apps.length) {
