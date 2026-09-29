@@ -1,13 +1,13 @@
 const admin = require('firebase-admin');
 
-if (!admin.apps.length) {
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY 
-    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
-    : undefined;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY_B64
+  ? Buffer.from(process.env.FIREBASE_PRIVATE_KEY_B64, 'base64').toString('utf8')
+  : undefined;
 
+if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: "bb-high-school-portal",
+      projectId: "bb-high-school-portal", 
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: privateKey
     })
@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   try {
     const { title, body } = JSON.parse(event.body);
 
-    // 1. Firestore के 'fcm_tokens' से सभी डिवाइस टोकन प्राप्त करें
+    // 1. Firestore 
     const tokensSnap = await db.collection('fcm_tokens').get();
     
     if (tokensSnap.empty) {
@@ -36,13 +36,12 @@ exports.handler = async (event) => {
 
     const tokens = tokensSnap.docs.map(doc => doc.id);
 
-    // 2. High Priority + Android Channel Payload तैयार करें
+  
     const message = {
       notification: {
         title: "📢 " + (title || "School Notice"),
         body: body || "New notice uploaded!"
       },
-      // 🔥 APK (Android) को बंद ऐप में नोटिफिकेशन जगाने के लिए सेटिंग्स
       android: {
         priority: "high",
         notification: {
@@ -55,10 +54,10 @@ exports.handler = async (event) => {
         title: title || "New Notice",
         body: body || "Check student portal"
       },
-      tokens: tokens // सभी डिवाइस टोकन्स
+      tokens: tokens
     };
 
-    // 3. सभी डिवाइसेस पर नोटिफिकेशन भेजें
+
     const response = await admin.messaging().sendEachForMulticast(message);
 
     return {
@@ -77,4 +76,3 @@ exports.handler = async (event) => {
     };
   }
 };
-        
