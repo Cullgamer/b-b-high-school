@@ -4,6 +4,7 @@
   "description": "School Portal Functions",
   "main": "index.js",
   "dependencies": {
-    "firebase-admin": "^11.11.1"
+    "firebase-admin": "^11.11.1",
+    "cloudinary": "^1.41.3"
   }
 }
