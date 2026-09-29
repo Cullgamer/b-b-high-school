@@ -169,14 +169,15 @@
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading()
         });
-        fileUrl = await uploadToCloudinary(noticeFile);
+       const result = await uploadToCloudinary(noticeFile);
+       fileUrl = result.fileUrl
       }
 
       // 🔥 Firestore Database में नया नोटिस सेव करें
       await addDoc(collection(db, "notices"), {
         title: noticeTitle,
         desc: noticeDesc,
-        fileUrl: fileUrl.fileUrl,
+        fileUrl: fileUrl,
         fileType: fileType,
         postedBy: currentTeacherData.fullName || "Teacher",
         postedById: currentTeacherData.teacherId || user.uid,
