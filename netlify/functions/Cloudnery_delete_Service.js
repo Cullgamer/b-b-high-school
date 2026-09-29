@@ -13,7 +13,7 @@ exports.handler = async function(event, context){
 
     let cloudname, apikey, apisecret;
     if (accountName === 'schoolCloud1'){
-      cloudname = process.env.schoolCloud1_Cloud_Name;
+      cloudname = "xwrqpiq3";
       apikey = process.env.schoolCloud1_API_Key;
       apisecret = process.env.schoolCloud1_API_Secret;
     } 
