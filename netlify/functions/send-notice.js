@@ -3,6 +3,9 @@ const admin = require('firebase-admin');
 function getPrivateKey() {
   let rawKey = process.env.FIREBASE_PRIVATE_KEY_B64 || '';
   // एक्स्ट्रा कोट्स और स्पेसेस हटाओ
+  console.log("Client Email Check:", process.env.FIREBASE_CLIENT_EMAIL);
+console.log("Private Key Length:", process.env.FIREBASE_PRIVATE_KEY_B64 ? process.env.FIREBASE_PRIVATE_KEY_B64.length : "MISSING!");
+  
   rawKey = rawKey.trim().replace(/^["']|["']$/g, ''); 
 
   if (!rawKey) return undefined;
