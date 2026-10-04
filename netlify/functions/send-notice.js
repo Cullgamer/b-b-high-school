@@ -1,22 +1,38 @@
 const admin = require('firebase-admin');
-let rawPrivateKey = process.env.FIREBASE_PRIVATE_KEY_B64 || '';
-rawPrivateKey = rawPrivateKey.trim().replace(/^["']|["']$/g, ''); 
 
-const privateKey = rawPrivateKey
-  ? Buffer.from(rawPrivateKey, 'base64').toString('utf8')
-  : undefined;
+function getPrivateKey() {
+  let rawKey = process.env.FIREBASE_PRIVATE_KEY_B64 || '';
+  // एक्स्ट्रा कोट्स और स्पेसेस हटाओ
+  rawKey = rawKey.trim().replace(/^["']|["']$/g, ''); 
+
+  if (!rawKey) return undefined;
+
+  try {
+    // पहले Base64 डिकोड करो
+    let decoded = Buffer.from(rawKey, 'base64').toString('utf8');
+    
+    // अगर की के अंदर लिटरल '\n' (backslash + n) रह गया हो, तो उसे असली न्यू-लाइन में बदलो
+    decoded = decoded.replace(/\\n/g, '\n');
+    
+    return decoded;
+  } catch (err) {
+    console.error("Private key decoding error:", err);
+    return undefined;
+  }
+}
 
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
       projectId: "bb-high-school-portal", 
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey
+      privateKey: getPrivateKey()
     })
   });
 }
 
 const db = admin.firestore();
+
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
