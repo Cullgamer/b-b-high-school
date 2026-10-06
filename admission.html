@@ -183,7 +183,7 @@
 
             <div class="form-group">
                 <label class="form-label" id="lblClass">Applying for Class</label>
-                <select class="form-select" id="st">
+                <select class="form-select" id="st" required>
                     <option value="" id="optSelectClass">Select Class</option>   
                     <option value="8">Class 8th</option>
                     <option value="9">Class 9th</option>
@@ -414,7 +414,9 @@
                studentphotoPublic = result2.publicId;
            } 
            catch (err) { Swal.fire('Error', 'Photo upload failed!', 'error'); return; }
-       }
+       } 
+       const pin = Math.floor(1000 + Math.random() * 9000).toString();
+     
 
        let addmissionData = {
            status: "pending",
@@ -424,6 +426,7 @@
        if (studentn !== "") { addmissionData.studentName = studentn; }
        if (mothern !== "") { addmissionData.motherName = mothern; }
        if (st !== "") { addmissionData.admissionClass = st; }
+       if (st !== "") { addmissionData.studentClass = st; }
        if (mobilenum !== "") { addmissionData.mobileNumber = mobilenum; }
        if (marklistdone !== "") { addmissionData.previousMarklist = marklistdone; }
        if (photostudent !== "") { addmissionData.studentPhotoUrl = photostudent; }
@@ -442,9 +445,10 @@
        if (studentphotoPublic) { addmissionData.S_P_P_ID = studentphotoPublic; }
        if (marcloudn) { addmissionData.M_C_N = marcloudn; }
        if (markpublicid) { addmissionData.M_P_ID = markpublicid; }
+       if (pin) { addmissionData.secretPin = pin; }
 
 
-       const uniqueStudentAdmissionId = `${studentn}_${mothern}_${BOD}`.replace(/\s+/g, '_');
+       const uniqueStudentAdmissionId = `${studentn}_${mothern}_${BOD}`.replace(/[\/\\?%*:|"<>\s]/g, '_');
 
        try {
            await setDoc(doc(db, "admissionForms", uniqueStudentAdmissionId), addmissionData, { merge: true });

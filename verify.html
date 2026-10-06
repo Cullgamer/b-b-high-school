@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>विद्यार्थी पडताळणी - Student Verification</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .language-float-container {
+            max-width: 750px;
+            margin: 0 auto 10px auto;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .lang-btn {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #c93b2b;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Verification Box Styling */
+        .verify-box {
+            max-width: 450px;
+            background: #ffffff;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-top: 6px solid #c93b2b;
+            text-align: center;
+        }
+
+        .verify-box h2 {
+            color: #c93b2b;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .verify-box p {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .verify-box input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .verify-box button {
+            width: 100%;
+            padding: 12px;
+            background: #c93b2b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .verify-box button:hover {
+            background: #a82e22;
+        }
+
+        /* Report Card Container (Initially Hidden) */
+        .report-card-container {
+            max-width: 750px;
+            background: #ffffff;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-top: 6px solid #c93b2b;
+            display: none; /* शुरू में छिपा रहेगा */
+        }
+
+        .school-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .school-logo {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid #c93b2b;
+        }
+
+        .school-title-box {
+            flex-grow: 1;
+        }
+
+        .school-header h1 {
+            font-size: 1.4rem;
+            color: #c93b2b;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .school-header p {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .profile-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 25px;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .profile-pic-box {
+            width: 110px;
+            height: 130px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ccc;
+            flex-shrink: 0;
+        }
+
+        .profile-pic-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-basic-info h2 {
+            font-size: 1.3rem;
+            color: #222;
+            margin-bottom: 6px;
+        }
+
+        .student-basic-info p {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .section-title {
+            grid-column: span 2;
+            font-size: 1rem;
+            color: #c93b2b;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            background: #f9f9f9;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border-left: 4px solid #c93b2b;
+        }
+
+        .detail-item label {
+            font-size: 0.75rem;
+            color: #777;
+            display: block;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-item span {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .document-section {
+            margin-bottom: 25px;
+        }
+
+        .document-section h3 {
+            font-size: 1rem;
+            color: #444;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-print {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .language-float-container, .verify-box {
+                display: none !important;
+            }
+            .report-card-container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+                display: block !important;
+            }
+            .action-buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="language-float-container">
+        <button class="lang-btn" id="langToggleBtn" onclick="toggleLanguage()">English / मराठी</button>
+    </div>
+
+    <!-- 1. Mobile Number & OTP Verification Box -->
+    <div class="verify-box" id="verifyBox">
+        <h2>inter pin</h2>
+        
+
+        <!-- Step 2: OTP Input (Initially Hidden) -->
+        <div id="otpInputSection" style="display: block;">
+            <input type="text" id="otpCodeInput" placeholder="maximum 4 number" maxlength="4">
+            <button onclick="verifyOtp()" id="verifyOtpBtn">verify pink</button>
+        </div>
+    </div>
+
+    <!-- 2. Main Student Report Card Container (Initially Hidden) -->
+    <div class="report-card-container" id="reportCardContainer">
+        <div class="school-header">
+            <img src="logo.svg" alt="School Logo" class="school-logo">
+            <div class="school-title-box">
+                <h1 id="schoolNameText">बाळासाहेब भरस्कर हायस्कूल म्हैसांग</h1>
+                <p id="schoolSubText">विद्यार्थी प्रवेश आणि नोंदणी अहवाल</p>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="profile-pic-box">
+                <span id="photoPlaceholder">विद्यार्थ्याचा फोटो</span>
+            </div>
+            <div class="student-basic-info">
+                <h2 id="displayName">नाव: माहिती नाही</h2>
+                <p><strong id="lblClass">प्रवेश घेतलेला वर्ग:</strong> <span id="displayClass">माहिती नाही</span></p>
+                <p><strong id="lblAppDate">अर्ज तारीख:</strong> <span id="displayDate">माहिती नाही</span></p>
+                <p><strong id="lblStatus">स्थिती:</strong> <span style="color: green; font-weight: bold;" id="displayStatus">तपासले आणि निश्चित केले</span></p>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="section-title" id="secFamily">कुटुंब आणि वैयक्तिक माहिती</div>
+            
+            <div class="detail-item">
+                <label id="lblMother">आईचे नाव</label>
+                <span id="displayMother">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblFather">वडिलांचे नाव</label>
+                <span id="displayFather">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblDob">जन्म तारीख</label>
+                <span id="displayDob">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblMobile">मोबाईल नंबर</label>
+                <span id="displayMobile">माहिती नाही</span>
+            </div>
+
+            <div class="section-title" id="secIdentity">ओळख आणि पार्श्वभूमी</div>
+
+            <div class="detail-item">
+                <label id="lblStudentId">विद्यार्थी आयडी / आधार / अपार</label>
+                <span id="displayStudentId">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblNationality">राष्ट्रीयत्व आणि भाषा</label>
+                <span id="displayNationality">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblCaste">जात आणि प्रवर्ग तपशील</label>
+                <span id="displayCaste">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblBirthPlace">जन्म ठिकाण</label>
+                <span id="displayBirthPlace">माहिती नाही</span>
+            </div>
+
+            <div class="section-title" id="secSchooling">पत्ता आणि मागील शाळा</div>
+
+            <div class="detail-item" style="grid-column: span 2;">
+                <label id="lblAddress">रहिवासी पत्ता</label>
+                <span id="displayAddress">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblLeavingDate">शाळा सोडल्याची तारीख (असल्यास)</label>
+                <span id="displayLeavingDate">माहिती नाही</span>
+            </div>
+            <div class="detail-item">
+                <label id="lblLeavingReason">शाळा सोडण्याचे कारण</label>
+                <span id="displayLeavingReason">माहिती नाही</span>
+            </div>
+        </div>  
+
+        <div class="document-section">
+            <h3 id="lblDocTitle">संलग्न मागील गुणपत्रिका / दस्तऐवज</h3>
+            <div id="documentContainer">
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;" id="lblDocDesc">दस्तऐवज दुवा:</p>
+                <a id="marklistLink" href="#" target="_blank" style="color: #1a0dab; font-size: 0.9rem; text-decoration: underline;">दस्तऐवज पहा</a>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-back" onclick="history.back()" id="btnBack">मागे जा</button>
+            <button class="btn btn-print" onclick="window.print()" id="btnPrint">प्रिन्ट रिपोर्ट कार्ड</button>
+        </div>
+    </div>
+
+<script type="module">
+    import { db } from "./firebase-config.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    let currentLang = 'mr'; // बायडिफॉल्ट मराठी सेट केली आहे
+    let fetchedData = null;
+    let studentId = null;
+
+    const translations = {
+        mr: {
+            verifyTitle: "पालक पडताळणी",
+            verifyDesc: "विद्यार्थ्याचा अहवाल पाहण्यासाठी तुमच्या नोंदणीकृत मोबाईल नंबरवर व्हॉट्सॲप (WhatsApp) द्वारे OTP पाठवला जाईल.",
+            sendOtpBtn: "OTP पाठवा",
+            verifyOtpBtn: "OTP तपासा",
+            schoolName: "बाळासाहेब भरस्कर हायस्कूल म्हैसांग",
+            schoolSub: "विद्यार्थी प्रवेश आणि नोंदणी अहवाल",
+            lblClass: "प्रवेश घेतलेला वर्ग:",
+            lblAppDate: "अर्ज तारीख:",
+            lblStatus: "स्थिती:",
+            statusText: "तपासले आणि निश्चित केले",
+            secFamily: "कुटुंब आणि वैयक्तिक माहिती",
+            lblMother: "आईचे नाव",
+            lblFather: "वडिलांचे नाव",
+            lblDob: "जन्म तारीख",
+            lblMobile: "मोबाईल नंबर",
+            secIdentity: "ओळख आणि पार्श्वभूमी",
+            lblStudentId: "विद्यार्थी आयडी / आधार / अपार",
+            lblNationality: "राष्ट्रीयत्व आणि भाषा",
+            lblCaste: "जात आणि प्रवर्ग तपशील",
+            lblBirthPlace: "जन्म ठिकाण",
+            secSchooling: "पत्ता आणि मागील शाळा",
+            lblAddress: "रहिवासी पत्ता",
+            lblLeavingDate: "शाळा सोडल्याची तारीख (असल्यास)",
+            lblLeavingReason: "शाळा सोडण्याचे कारण",
+            lblDocTitle: "संलग्न मागील गुणपत्रिका / दस्तऐवज",
+            lblDocDesc: "दस्तऐवज दुवा:",
+            viewDocText: "संलग्न गुणपत्रिका/दस्तऐवज पहा",
+            noDocText: "कोणताही दस्तऐवज संलग्न नाही.",
+            btnBack: "मागे जा",
+            btnPrint: "प्रिन्ट रिपोर्ट कार्ड",
+            photoText: "विद्यार्थ्याचा फोटो",
+            noData: "माहिती उपलब्ध नाही"
+        },
+        en: {
+            verifyTitle: "Parent Verification",
+            verifyDesc: "An OTP will be sent via WhatsApp to your registered mobile number to view the student report.",
+            sendOtpBtn: "Send OTP",
+            verifyOtpBtn: "Verify OTP",
+            schoolName: "Balasaheb Bharskar High School Mhaisang",
+            schoolSub: "Official Student Admission & Enrollment Record",
+            lblClass: "Admission Class:",
+            lblAppDate: "Application Date:",
+            lblStatus: "Status:",
+            statusText: "Verified & Confirmed",
+            secFamily: "Family & Personal Information",
+            lblMother: "Mother's Name",
+            lblFather: "Father's Name",
+            lblDob: "Date of Birth",
+            lblMobile: "Mobile Number",
+            secIdentity: "Identity & Background",
+            lblStudentId: "Student ID / [Aadhaar Redacted] / Apaar",
+            lblNationality: "Nationality & Language",
+            lblCaste: "Caste & Category Details",
+            lblBirthPlace: "Birth Place",
+            secSchooling: "Address & Previous Schooling",
+            lblAddress: "Residential Address",
+            lblLeavingDate: "School Leaving Date (If Left)",
+            lblLeavingReason: "School Leaving Reason",
+            lblDocTitle: "Attached Previous Marksheet / Document",
+            lblDocDesc: "Document link:",
+            viewDocText: "View Attached Marksheet/Document",
+            noDocText: "No document attached.",
+            btnBack: "Go Back",
+            btnPrint: "Print Report Card",
+            photoText: "Student Photo",
+            noData: "No Data"
+        }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        studentId = urlParams.get('id');
+
+        if (!studentId) {
+            alert("चुकीची लिंक! विद्यार्थी आयडी आढळला नाही.");
+            return;
+        }
+        updateLanguageUI();
+    });
+
+
+    // 2. Verify OTP Logic
+    window.verifyOtp = function() {
+        const secretPin = document.getElementById("otpCodeInput").value.trim();
+        if (secretPin.length < 4) {
+            alert("कृपया वैध OTP प्रविष्ट करा.");
+            return;
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        studentId = urlParams.get('id');
+        verifyStudentData(studentId,secretPin)
+async function verifyStudentData(studentId, secretPin) {
+    try {
+        const response = await fetch('/.netlify/functions/verify-student', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                studentId: studentId,
+                secretPin: secretPin
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            console.log("डेटा मिल गया भाई:", result.data);
+            fetchedData = result.data
+           document.getElementById('otpInputSection'). style.display = "none";
+           document.getElementById('verifyBox').style.display = "none";
+    document.getElementById('reportCardContainer').style.display = "block"; 
+    renderPageContent();
+            
+        } else {
+            alert("एरर: " + result.message);
+        }
+
+    } catch (error) {
+        console.error("कनेक्शन में गड़बड़ हो गई:", error);
+    }
+}
+}
+
+    window.renderPageContent = function() {
+        if (!fetchedData) return;
+        const t = translations[currentLang];
+
+        document.getElementById("schoolNameText").innerText = t.schoolName;
+        document.getElementById("schoolSubText").innerText = t.schoolSub;
+        document.getElementById("lblClass").innerText = t.lblClass;
+        document.getElementById("lblAppDate").innerText = t.lblAppDate;
+        document.getElementById("lblStatus").innerText = t.lblStatus;
+        document.getElementById("displayStatus").innerText = t.statusText;
+
+        document.getElementById("secFamily").innerText = t.secFamily;
+        document.getElementById("secIdentity").innerText = t.secIdentity;
+        document.getElementById("secSchooling").innerText = t.secSchooling;
+
+        document.getElementById("lblMother").innerText = t.lblMother;
+        document.getElementById("lblFather").innerText = t.lblFather;
+        document.getElementById("lblDob").innerText = t.lblDob;
+        document.getElementById("lblMobile").innerText = t.lblMobile;
+        document.getElementById("lblStudentId").innerText = t.lblStudentId;
+        document.getElementById("lblNationality").innerText = t.lblNationality;
+        document.getElementById("lblCaste").innerText = t.lblCaste;
+        document.getElementById("lblBirthPlace").innerText = t.lblBirthPlace;
+        document.getElementById("lblAddress").innerText = t.lblAddress;
+        document.getElementById("lblLeavingDate").innerText = t.lblLeavingDate;
+        document.getElementById("lblLeavingReason").innerText = t.lblLeavingReason;
+        document.getElementById("lblDocTitle").innerText = t.lblDocTitle;
+        document.getElementById("lblDocDesc").innerText = t.lblDocDesc;
+        document.getElementById("btnBack").innerText = t.btnBack;
+        document.getElementById("btnPrint").innerText = t.btnPrint;
+
+        document.getElementById("displayName").innerText = fetchedData.studentName ? (currentLang === 'mr' ? "नाव: " + fetchedData.studentName : "Name: " + fetchedData.studentName) : t.noData;
+        document.getElementById("displayClass").innerText = fetchedData.admissionClass ? fetchedData.admissionClass + "th" : t.noData;
+        
+        document.getElementById("displayMother").innerText = fetchedData.motherName || t.noData;
+        document.getElementById("displayFather").innerText = fetchedData.Father_or_Mother || t.noData;
+        document.getElementById("displayDob").innerText = fetchedData.dob || t.noData;
+        document.getElementById("displayMobile").innerText = fetchedData.mobileNumber || t.noData;
+        
+        document.getElementById("displayStudentId").innerText = fetchedData.studentIdNo || t.noData;
+        document.getElementById("displayNationality").innerText = fetchedData.nationalityAndLang || t.noData;
+        document.getElementById("displayCaste").innerText = fetchedData.casteInfo || t.noData;
+        document.getElementById("displayBirthPlace").innerText = fetchedData.birthPlaceInfo || t.noData;
+        
+        document.getElementById("displayAddress").innerText = fetchedData.address || t.noData;
+        document.getElementById("displayLeavingDate").innerText = fetchedData.schoolLeavingDate || t.noData;
+        document.getElementById("displayLeavingReason").innerText = fetchedData.schoolLeavingReason || t.noData;
+
+        if (fetchedData.createdAt) {
+            try {
+                document.getElementById("displayDate").innerText = fetchedData.createdAt.toDate().toLocaleDateString();
+            } catch(e) {
+                document.getElementById("displayDate").innerText = t.noData;
+            }
+        }
+
+        if (fetchedData.studentPhotoUrl && fetchedData.studentPhotoUrl !== "no Data") {
+            const picBox = document.querySelector(".profile-pic-box");
+            picBox.innerHTML = `<img src="${fetchedData.studentPhotoUrl}" alt="Student Photo" style="width:100%; height:100%; object-fit:cover;">`;
+        } else {
+            document.querySelector(".profile-pic-box").innerHTML = `<span>${t.photoText}</span>`;
+        }
+
+        if (fetchedData.previousMarklist && fetchedData.previousMarklist !== "no Data") {
+            const marklistLink = document.getElementById("marklistLink");
+            marklistLink.href = fetchedData.previousMarklist;
+            marklistLink.innerText = t.viewDocText;
+        } else {
+            document.getElementById("documentContainer").innerHTML = `<p style='font-size: 0.85rem; color: #777;'>${t.noDocText}</p>`;
+        }
+    }
+
+    window.updateLanguageUI = function() {
+        const t = translations[currentLang];
+        document.getElementById("verifyTitle").innerText = t.verifyTitle;
+        document.getElementById("verifyDesc").innerText = t.verifyDesc;
+        document.getElementById("sendOtpBtn").innerText = t.sendOtpBtn;
+        document.getElementById("verifyOtpBtn").innerText = t.verifyOtpBtn;
+        document.getElementById("langToggleBtn").innerText = currentLang === 'mr' ? "Switch to English" : "मराठी मध्ये बदला";
+        
+        if(fetchedData) {
+            renderPageContent();
+        }
+    }
+
+    window.toggleLanguage = function() {
+        currentLang = currentLang === 'mr' ? 'en' : 'mr';
+        updateLanguageUI();
+    }
+</script>
+</body>
+</html>
