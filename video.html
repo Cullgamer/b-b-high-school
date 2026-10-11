@@ -287,7 +287,7 @@
   }
 
   // Firestore Data Save फ़ंक्शन (Custom Document ID with fileName)
-  async function saveToDatabase(fileName, fileUrl, mediaType, cloudName, publicId) {
+  async function saveToDatabase(fileName, fileUrl, mediaType, cloudName, publicId, resourceType) {
     try {
       await setDoc(doc(db, "videos_files", fileName), {
         name: fileName,
@@ -296,6 +296,7 @@
         type: mediaType,
         cloudName: cloudName,
         publicId: publicId,
+        resourceType: resourceType,
         createdAt: serverTimestamp()
       });
 
@@ -342,7 +343,7 @@
           didOpen: () => Swal.showLoading()
         });
 
-        await saveToDatabase(fileName, finalUrl, "youtube" , "null", "null");
+        await saveToDatabase(fileName, finalUrl, "youtube" , "null", "null", "null");
 
       } else {
         // 🟢 File Upload Logic
@@ -364,7 +365,7 @@
 
         const cloudinaryResult = await uploadToCloudinary(fileInput.files[0]);
         
-        await saveToDatabase(fileName, cloudinaryResult.fileUrl, "file", cloudinaryResult.cloudName, cloudinaryResult.publicId);
+        await saveToDatabase(fileName, cloudinaryResult.fileUrl, "file", cloudinaryResult.cloudName, cloudinaryResult.publicId,cloudinaryResult.resourceType);
       }
     } catch (err) {
       console.error(err);

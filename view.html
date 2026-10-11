@@ -36,7 +36,7 @@
 
 <script type="module">
   import { db,  } from "./firebase-config.js";
-  import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { collection, query, orderBy, onSnapshot, doc, deleteDoc,where,getDoc,getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
  import { 
@@ -139,7 +139,27 @@ noticeList.addEventListener("click", async (e) => {
     });
 
     if (result.isConfirmed) {
-      try {
+      try{
+        console.log("data nikalne Ki koshish")
+        const data = await getDoc(doc(db,"notices",id))
+        console.log("data nikal liya hai")
+   if (data.exists()){
+     console.log("Tata exists karta hai")
+       const sdata = data.data();
+       console.log("data ko format mein karne ki koshish")
+       if(sdata.fileUrl && data.fileUrl !== "null"){
+         console.log("had your day ya nahin dekhne Ki koshish")
+           const photoid = sdata.filepId;
+           const cloudid = sdata.cloudName;
+           const resourceType1 = sdata.resourceType;
+           
+           console.log("delete function activate for photo ")
+           cloudinaryDelete(photoid,cloudid, resourceType1);
+       }else{console.log("koshish nakam");}
+     
+   }
+    
+      
         // Delete from Firestore
         await deleteDoc(doc(db, "notices", id));
         Swal.fire('Deleted!', 'The notice has been successfully deleted.', 'success');
@@ -150,6 +170,27 @@ noticeList.addEventListener("click", async (e) => {
     }
   }
 });
+async function cloudinaryDelete(publicId, accountName, resourceType) {
+    try {
+        const response = await fetch('/.netlify/functions/Cloudnery_delete_Service', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ publicId: publicId, accountName: accountName,
+              resourceType: resourceType
+              
+            })
+        });
+
+        const data = await response.json();
+        console.log("Server ka jawab:", data);
+        alert("File delete ho gayi bhai!");
+    } catch (err) {
+        console.error("Request fail ho gayi:", err);
+    }
+}
+
 
 
 </script>

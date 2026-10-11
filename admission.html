@@ -146,6 +146,9 @@
         
         <form id="admissionF">
             <div class="form-group">
+                 <div class="form-group">
+                <label class="form-label" id="date">Enter today's date (optional)</label> <input type="text" class="form-input" id="datetoday" placeholder="18/01/2026" >
+            </div>
                 <label class="form-label" id="lblPhoto">Student Passport Photo</label>
                 <input type="file" id="photo-s" class="form-input file-input-wrapper">
             </div>
@@ -235,10 +238,8 @@
     <div class="card">
         <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
             <span id="historyTitle">Admission History & Applications</span>
-            <select id="yearFilter" class="form-select" style="width: 120px; padding: 4px; font-size: 0.85rem;">
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
-            </select>
+            <input id="yearFilter" class="form-select"
+            style="width: 80px; padding: 4px; font-size: 0.85rem; text-align: center;">
         </div>
         
         <div id="admissionListContainer">
@@ -252,10 +253,13 @@
 </div>
 
 <script type="module">
+const rDate = new Date().getFullYear();
+document.getElementById("yearFilter").value = rDate;
+console.log(rDate)
   import { db } from "./firebase-config.js";
   import { uploadToCloudinary } from "./cloudinaryService.js";
   import { 
-    addDoc, serverTimestamp, doc, setDoc, collection, query, orderBy, where, getDocs, onSnapshot 
+    addDoc, serverTimestamp, doc, setDoc, collection, query, orderBy, where, getDocs, onSnapshot,getDoc 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -286,7 +290,8 @@
           lblMarklist: "Previous Marksheet / Documents (Optional)",
           submitBtn: "Submit Application",
           historyTitle: "Admission History & Applications",
-          loadingText: "Loading submissions..."
+          loadingText: "Loading submissions..." ,
+          date: "Enter today's date (optional)"
       },
       mr: {
           headerTitle: "📋 प्रवेश अर्ज - बी.बी. हायस्कूल",
@@ -310,7 +315,8 @@
           lblMarklist: "मागील गुणपत्रिका / कागदपत्रे (वैकल्पिक)",
           submitBtn: "अर्ज सबमिट करा",
           historyTitle: "प्रवेश इतिहास आणि अर्ज",
-          loadingText: "माहिती लोड होत आहे..."
+          loadingText: "माहिती लोड होत आहे..." ,
+          date: "आजची दिनांक टाका (वैकल्पिक)"
       }
   };
 
@@ -320,6 +326,7 @@
       const t = translations[lang];
 
       document.getElementById("headerTitle").innerText = t.headerTitle;
+      document.getElementById("date").innerText = t.date;
       document.getElementById("backBtn").innerText = t.backBtn;
       document.getElementById("formTitle").innerText = t.formTitle;
       document.getElementById("lblPhoto").innerText = t.lblPhoto;
@@ -362,7 +369,7 @@
     }
   });
 
-  // Cloudinary Upload
+
 
 
   const admissionF = document.getElementById("admissionF");
@@ -370,7 +377,7 @@
        e.preventDefault();
        
        const studentn = document.getElementById("studentn").value.trim();
-       const mothern = document.getElementById("mothern").value.trim(); // नई फील्ड: माता का नाम
+       const mothern = document.getElementById("mothern").value.trim(); 
        const guardian = document.getElementById("guardian").value;
        const mobilenum = document.getElementById("Mobilenum").value.trim();
        const st = document.getElementById("st").value;
@@ -385,14 +392,28 @@
        
        const marklist = document.getElementById("marklist").files[0];
        const photos = document.getElementById("photo-s").files[0];
+       const oldDateStr = document.getElementById('datetoday').value;
+       let originalDate = ""
+       if (oldDateStr){
+       const parts = oldDateStr.split("/");
+const day = parseInt(parts[0], 10);
+const month = parseInt(parts[1], 10) - 1; 
+const year = parseInt(parts[2], 10);
+
+ originalDate = new Date(year, month, day);
+           
+       }else{
+           originalDate = new Date();
+       }
        
-       
-              let marklistdone = "";
+       let marklistdone = "";
        let photostudent = "";
        let marcloudn = "";
        let markpublicid = "";
        let studentphotoCN = "";
        let studentphotoPublic = "";
+       let markresourceType = "";
+       let studentresourceType = "";
 
        if (marklist) {
            Swal.fire({ title: 'Uploading file...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -401,6 +422,7 @@
                marklistdone = result1.fileUrl;
                marcloudn = result1.cloudName;
                markpublicid = result1.publicId;
+               markresourceType = result1.resourceType
            } 
            catch (err) { Swal.fire('Error', 'File upload failed!', 'error'); return; }
        }
@@ -412,6 +434,7 @@
                photostudent = result2.fileUrl;
                studentphotoCN = result2.cloudName;
                studentphotoPublic = result2.publicId;
+               studentresourceType = result2.resourceType; 
            } 
            catch (err) { Swal.fire('Error', 'Photo upload failed!', 'error'); return; }
        } 
@@ -420,7 +443,7 @@
 
        let addmissionData = {
            status: "pending",
-           createdAt: new Date(),
+           createdAt: originalDate,
        };
 
        if (studentn !== "") { addmissionData.studentName = studentn; }
@@ -445,11 +468,46 @@
        if (studentphotoPublic) { addmissionData.S_P_P_ID = studentphotoPublic; }
        if (marcloudn) { addmissionData.M_C_N = marcloudn; }
        if (markpublicid) { addmissionData.M_P_ID = markpublicid; }
-       if (pin) { addmissionData.secretPin = pin; }
-
-
+       if (markresourceType) { addmissionData.M_R_T = markresourceType; }
+       if (studentresourceType) { addmissionData.S_R_T  = studentresourceType; }
+       
+       
        const uniqueStudentAdmissionId = `${studentn}_${mothern}_${BOD}`.replace(/[\/\\?%*:|"<>\s]/g, '_');
+       const doneid = `https://b-b-high-school.netlify.app/verify.html?id=${uniqueStudentAdmissionId}`
+addmissionData.qrCodeUrl =`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${doneid}`
+try {
+   const data = await getDoc(doc(db,"admissionForms",uniqueStudentAdmissionId))
+   if (data.exists()){
+       const stdata = data.data();
+       if(stdata.studentPhotoUrl&& stdata.studentPhotoUrl.trim() !== ""  && photostudent !== "" ){
+           const photoid = stdata.S_P_P_ID;
+           const cloudid = stdata.S_P_C_N;
+           const resourceType1 = stdata.S_R_T;
+           
+           console.log("delete function activate for photo ")
+           cloudinaryDelete(photoid,cloudid, resourceType1);
+       }
+       if(stdata.previousMarklist && stdata.previousMarklist.trim() !== "" && marklistdone !== ""){
+           const markid = stdata.M_P_ID;
+           const cloudn = stdata.M_C_N;
+           const resourceType2 = stdata.M_R_T;
+           console.log("delete function activate for marklist")
+           cloudinaryDelete(markid,cloudn, resourceType2);
+       }
+   }else{
+       if (pin) { addmissionData.secretPin = pin; }
+       await Swal.fire({
+               title: 'Pin!',
+               text: pin,
+               icon: 'success',
+               confirmButtonColor: '#b83b19'
+           });
 
+   }
+
+}catch(er){
+    console.log(er);
+}
        try {
            await setDoc(doc(db, "admissionForms", uniqueStudentAdmissionId), addmissionData, { merge: true });
 
@@ -521,6 +579,26 @@
          container.innerHTML = "<p style='font-size: 0.9rem; color: red;'>Failed to load records.</p>";
        }
    }
+   async function cloudinaryDelete(publicId, accountName, resourceType) {
+    try {
+        const response = await fetch('/.netlify/functions/Cloudnery_delete_Service', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ publicId: publicId, accountName: accountName,
+              resourceType: resourceType
+              
+            })
+        });
+
+        const data = await response.json();
+        console.log("Server ka jawab:", data);
+        alert("File delete ho gayi bhai!");
+    } catch (err) {
+        console.error("Request fail ho gayi:", err);
+    }
+}
 
    document.getElementById("yearFilter").addEventListener("change", loda);
    window.addEventListener("DOMContentLoaded", loda);

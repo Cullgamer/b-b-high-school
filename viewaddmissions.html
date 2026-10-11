@@ -139,6 +139,20 @@
         .btn-approve:hover {
             background-color: #1b5e20;
         }
+         .form-select {
+            width: 100%;
+            padding: 13px 12px;
+            border: 3px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            background: #fafafa;
+            color: #333;
+        }
+         .form-select:focus {
+            border-color: #c93b2b;
+            background: #fff;
+        }
 
         .btn-reject {
             background-color: #c62828;
@@ -162,6 +176,26 @@
             font-size: 0.9rem;
             padding: 20px;
         }
+        /* SweetAlert के बटनों को एक जैसा और शानदार बनाने के लिए */
+.swal2-confirm, .swal2-cancel {
+    flex: 1 !important;
+    padding: 12px 20px !important;
+    font-size: 15px !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+
+.swal2-confirm:active, .swal2-cancel:active {
+    transform: scale(0.95) !important;
+}
+
+.swal2-confirm:hover, .swal2-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
     </style>
 </head>
 <body>
@@ -171,17 +205,17 @@
         <div class="header-section">
             <h2>🎓 Admission Applications</h2>
             <div class="filter-box">
-                <select id="yearFilter">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                </select>
+               <input id="yearFilter" class="form-select"
+           type="tel"style="width: 80px; padding: 4px; font-size: 0.85rem; text-align: center;">
             </div>
             
             <div class="filter-box">
                 <select id="status">
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
+                    <option value="retained">Retained</option>
+                    <option value="graduated">Graduated</option>
+                    <option value="dropped">Dropped</option>
                 </select>
             </div>
         </div>
@@ -192,9 +226,11 @@
         </div>
     </div>
   <script type="module">
+  const rDate = new Date().getFullYear();
+document.getElementById("yearFilter").value = rDate;
       import { db } from "./firebase-config.js";
       import { 
-        addDoc, serverTimestamp, collection, query, orderBy, where, getDocs, onSnapshot, deleteDoc, doc, updateDoc
+        addDoc, serverTimestamp, collection, query, orderBy, where, getDocs, onSnapshot, deleteDoc, doc, updateDoc, getDoc
       } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
       // 🔐 Firebase Auth Imports
@@ -266,7 +302,7 @@ if (formStatus === "pending") {
                          htmlContent += `
                          <div class="box">
                              <div class="student-card" data-id="${docSnap.id}">
-                                 <div class="card-info" style="cursor: pointer;" onclick="window.location.href='detail.html?id=${docSnap.id}'">
+                                 <div class="card-info" style="cursor: pointer;>
                                      <h4 style="color: #c93b2b;">🎓 ${data.studentName}</h4>
                                      <p style="font-size: 0.85rem; color: #444;">Class: ${data.admissionClass}th | Mobile: ${data.mobileNumber}</p>
                                  </div>
@@ -287,15 +323,37 @@ if (formStatus === "pending") {
                      container.innerHTML = htmlContent;
                  }
 
-                 document.querySelectorAll(".student-card").forEach(card => {
+                                  document.querySelectorAll(".student-card").forEach(card => {
                      card.addEventListener("click", () => {
                          const studentId = card.getAttribute("data-id");
-                         window.location.href = `detail.html?id=${studentId}`;
-                     });
-                 });
-             });
+               Swal.fire({
+    title: 'छात्र विवरण (Student Details)',
+    text: 'आप इस छात्र की कौन सी जानकारी देखना चाहते हैं?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'More Details 🚀',
+    cancelButtonText: 'Normal Details 👍',
+    confirmButtonColor: '#00b894', 
+    cancelButtonColor: '#0984e3',
+    
+    buttonsStyling: true,
+    customClass: {
+        confirmButton: 'custom-confirm-btn',
+        cancelButton: 'custom-cancel-btn'
+    }
+}).then((result) => {
+    if (result.isConfirmed) {
+        window.location.href = `more_detail.html?id=${studentId}`;
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+        window.location.href = `detail.html?id=${studentId}`;
+    }
+});
+
+                          });
+                         }); 
+})
              
-           } catch (error) {
+   } catch (error) {
             console.error("Error loading data:", error);
             container.innerHTML = "<p style='font-size: 0.9rem; color: red;'>Failed to load records.</p>";
           }
@@ -314,7 +372,7 @@ if (formStatus === "pending") {
       });
 
       
-      document.getElementById("yearFilter").addEventListener("change", loadAdmissionForms);
+      document.getElementById("yearFilter").addEventListener("input", loadAdmissionForms);
       document.getElementById("status").addEventListener("change", loadAdmissionForms);
       window.deleteStudent = async function(studentId){
           const confirmResult = await Swal.fire({
@@ -328,7 +386,26 @@ if (formStatus === "pending") {
           });
           if (confirmResult.isConfirmed){
               try {
-                  await deleteDoc(doc(db, "admissionForms", studentId));
+                  
+                 const data = await getDoc(doc(db,"admissionForms",studentId))
+   if (data.exists()){
+       const stdata = data.data();
+       if(stdata.studentPhotoUrl && stdata.studentPhotoUrl.trim() !== ""){
+           const photoid = stdata.S_P_P_ID;
+           const cloudid = stdata.S_P_C_N;
+           const resourceType1 = stdata.S_R_T;
+           
+           console.log("delete function activate for photo ")
+           cloudinaryDelete(photoid,cloudid, resourceType1);
+       }
+       if(stdata.previousMarklist && stdata.previousMarklist.trim() !== ""){
+           const markid = stdata.M_P_ID;
+           const cloudn = stdata.M_C_N;
+           const resourceType2 = stdata.M_R_T;
+           console.log("delete function activate for marklist")
+           cloudinaryDelete(markid, cloudn, resourceType2);
+       }}
+       await deleteDoc(doc(db, "admissionForms", studentId));
               } catch (err) {
                   console.log("kuchh gadbad hai yaar", err);
               }
@@ -344,6 +421,28 @@ if (formStatus === "pending") {
           const message = "Congratulations! Your admission form has been approved.";
           window.open(`https://wa.me/91${mobileNum}?text=${encodeURIComponent(message)}`, '_blank');
       };
+      
+      async function cloudinaryDelete(publicId, accountName, resourceType) {
+    try {
+        const response = await fetch('/.netlify/functions/Cloudnery_delete_Service', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ publicId: publicId, accountName: accountName,
+              resourceType: resourceType
+              
+            })
+        });
+
+        const data = await response.json();
+        console.log("Server ka jawab:", data);
+        alert("File delete ho gayi bhai!");
+    } catch (err) {
+        console.error("Request fail ho gayi:", err);
+    }
+}
+
   </script>
 
 </body>

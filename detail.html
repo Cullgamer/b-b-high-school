@@ -50,7 +50,6 @@
             border-top: 6px solid #c93b2b;
         }
 
-        /* School Header with Flexbox so logo and text stay side-by-side cleanly */
         .school-header {
             display: flex;
             align-items: center;
@@ -113,13 +112,13 @@
             flex-shrink: 0;
         }
 
-        .profile-pic-box img {
+        .profile-pic-box img, .qr-pic-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .profile-pic-box span {
+        .profile-pic-box span, .qr-pic-box span {
             font-size: 0.75rem;
             color: #777;
             text-align: center;
@@ -189,6 +188,27 @@
             padding-bottom: 5px;
         }
 
+        .qr-code-section {
+            text-align: center; 
+            margin: 20px 0; 
+            background: #fafafa; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #e1e1e1;
+        }
+
+        .qr-pic-box {
+            width: 110px; 
+            height: 110px; 
+            background: #ddd; 
+            border-radius: 6px; 
+            overflow: hidden; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 2px solid #ccc;
+        }
+
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -236,9 +256,6 @@
                 border: none;
                 padding: 0;
                 max-width: 100%;
-            }
-            a[href*="netlify.com"], .netlify-badge {
-                display: none !important;
             }
             .action-buttons {
                 display: none;
@@ -312,7 +329,7 @@
                 <span id="displayBirthPlace">No Data</span>
             </div>
 
-            <div class="section-title" id="secSchooling">Address & Previous Schooling</div>
+            <div class="section-title" id="secSchooling">Address & Schooling</div>
 
             <div class="detail-item" style="grid-column: span 2;">
                 <label id="lblAddress">Residential Address</label>
@@ -336,6 +353,14 @@
             </div>
         </div>
 
+        <!-- QR Code Section -->
+        <div class="qr-code-section">
+            <p style="font-size: 0.85rem; color: #555; margin-bottom: 8px; font-weight: 600;" id="lblQrTitle">Student QR Code</p>
+            <div class="qr-pic-box">
+                <span id="qrPlaceholder">QR Code</span>
+            </div>
+        </div>
+
         <div class="action-buttons">
             <button class="btn btn-back" onclick="history.back()" id="btnBack">Go Back</button>
             <button class="btn btn-print" onclick="window.print()" id="btnPrint">Print Report Card</button>
@@ -344,9 +369,33 @@
 
 <script type="module">
     import { db } from "./firebase-config.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const auth = getAuth();
+    let currentTeacherData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+                const querySnap = await getDocs(q);
+
+                if (!querySnap.empty) {
+                    currentTeacherData = querySnap.docs[0].data();
+                } else {
+                    window.location.href = "index.html";
+                }
+            } catch (err) {
+                console.error("Auth check error:", err);
+            }
+        } else {
+            window.location.href = "index.html";
+        }
+    });
 
     let currentLang = 'en';
+    let fetchedData = null;
 
     const translations = {
         en: {
@@ -377,12 +426,14 @@
             btnBack: "Go Back",
             btnPrint: "Print Report Card",
             photoText: "Student Photo",
+            qrText: "QR Code",
+            lblQrTitle: "Student QR Code",
             noData: "No Data"
         },
         mr: {
             schoolName: "बाळासाहेब भरस्कर हायस्कूल म्हैसांग",
             schoolSub: "विद्यार्थी प्रवेश आणि नोंदणी अहवाल",
-            lblClass: "प्रवेश घेतलेली वर्ग:",
+            lblClass: "प्रवेश घेतलेला वर्ग:",
             lblAppDate: "अर्ज तारीख:",
             lblStatus: "स्थिती:",
             statusText: "तपासले आणि निश्चित केले",
@@ -407,11 +458,11 @@
             btnBack: "मागे जा",
             btnPrint: "प्रिन्ट रिपोर्ट कार्ड",
             photoText: "विद्यार्थ्याचा फोटो",
+            qrText: "क्यूआर कोड",
+            lblQrTitle: "विद्यार्थ्याचा क्यूआर कोड",
             noData: "माहिती उपलब्ध नाही"
         }
     };
-
-    let fetchedData = null;
 
     async function loadStudentDetails() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -466,6 +517,7 @@
         document.getElementById("lblLeavingReason").innerText = t.lblLeavingReason;
         document.getElementById("lblDocTitle").innerText = t.lblDocTitle;
         document.getElementById("lblDocDesc").innerText = t.lblDocDesc;
+        document.getElementById("lblQrTitle").innerText = t.lblQrTitle;
         document.getElementById("btnBack").innerText = t.btnBack;
         document.getElementById("btnPrint").innerText = t.btnPrint;
         document.getElementById("langToggleBtn").innerText = currentLang === 'en' ? "मराठी मध्ये बदला" : "Switch to English";
@@ -495,19 +547,44 @@
             }
         }
 
+        // Student Photo Render
         if (fetchedData.studentPhotoUrl && fetchedData.studentPhotoUrl !== "no Data") {
             const picBox = document.querySelector(".profile-pic-box");
-            picBox.innerHTML = `<img src="${fetchedData.studentPhotoUrl}" alt="Student Photo" style="width:100%; height:100%; object-fit:cover;">`;
+            if (picBox) {
+                picBox.innerHTML = `<img src="${fetchedData.studentPhotoUrl}" alt="Student Photo">`;
+            }
         } else {
-            document.querySelector(".profile-pic-box").innerHTML = `<span>${t.photoText}</span>`;
+            const picBox = document.querySelector(".profile-pic-box");
+            if (picBox) {
+                picBox.innerHTML = `<span>${t.photoText}</span>`;
+            }
         }
 
+        // QR Code Render
+        if (fetchedData.qrCodeUrl && fetchedData.qrCodeUrl !== "no Data") {
+            const qrBox = document.querySelector(".qr-pic-box");
+            if (qrBox) {
+                qrBox.innerHTML = `<img src="${fetchedData.qrCodeUrl}" alt="Student QR Code">`;
+            }
+        } else {
+            const qrBox = document.querySelector(".qr-pic-box");
+            if (qrBox) {
+                qrBox.innerHTML = `<span>${t.qrText}</span>`;
+            }
+        }
+
+        // Previous Marklist Link Render
         if (fetchedData.previousMarklist && fetchedData.previousMarklist !== "no Data") {
             const marklistLink = document.getElementById("marklistLink");
-            marklistLink.href = fetchedData.previousMarklist;
-            marklistLink.innerText = t.viewDocText;
+            if (marklistLink) {
+                marklistLink.href = fetchedData.previousMarklist;
+                marklistLink.innerText = t.viewDocText;
+            }
         } else {
-            document.getElementById("documentContainer").innerHTML = `<p style='font-size: 0.85rem; color: #777;'>${t.noDocText}</p>`;
+            const docContainer = document.getElementById("documentContainer");
+            if (docContainer) {
+                docContainer.innerHTML = `<p style='font-size: 0.85rem; color: #777;'>${t.noDocText}</p>`;
+            }
         }
     }
 

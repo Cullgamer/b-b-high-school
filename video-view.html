@@ -372,6 +372,7 @@
             const data = docSnap.data();
             const publicId = data.publicId || data.public_id;
             const cloudName = data.cloudName || data.cloud_name;
+            const resourceType = data.resourceType;
 
             // 2. If it has Cloudinary details, delete from Cloudinary via Netlify function
             if (publicId !== "null" && cloudName !== "null") {
@@ -380,7 +381,8 @@
                 headers: { 
                   'Content-Type': 'application/json' 
                 },
-                body: JSON.stringify({ publicId: publicId, accountName: cloudName })
+                body: JSON.stringify({ publicId: publicId, accountName: cloudName,
+                resourceType: resourceType})
               });
               const resData = await response.json();
               console.log("Cloudinary Delete Response:", resData);

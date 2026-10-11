@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Identity Card</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            background-color: #e4e9f2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .id-card {
+            width: 320px;
+            height: 500px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #c93b2b;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header, .card-body, .card-footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #c93b2b, #a52a1d) !important;
+            color: white;
+            text-align: center;
+            padding: 12px 10px;
+            border-bottom: 4px solid #ffc107;
+        }
+
+        .school-logo-top {
+            width: 42px;
+            height: 42px;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+            margin: 0 auto 4px auto;
+            object-fit: contain;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .card-header h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .card-header p {
+            font-size: 0.65rem;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .card-body {
+            padding: 12px 15px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-body::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.8);
+            width: 220px;
+            height: 220px;
+            background-image: url('logo.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.12;
+            filter: blur(1.5px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .card-body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .student-photo-box {
+            width: 90px;
+            height: 105px;
+            background: #eee;
+            border: 3px solid #c93b2b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .student-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 2px;
+        }
+
+        .student-class {
+            font-size: 0.8rem;
+            color: #c93b2b;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .student-info-grid {
+            width: 100%;
+            text-align: left;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .info-row span:first-child {
+            color: #555;
+            font-weight: 600;
+        }
+
+        .info-row span:last-child {
+            color: #111;
+            font-weight: 700;
+        }
+
+        .card-footer {
+            background: #f8f9fa !important;
+            padding: 8px 10px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.65rem;
+            color: #555;
+        }
+
+        .sign-line {
+            font-weight: bold;
+            font-size: 0.6rem;
+            color: #333;
+            border-top: 1px solid #777;
+            padding-top: 2px;
+            margin-top: 12px;
+        }
+
+        .mobile-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            padding: 12px 20px;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .print-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        /* 🔒 PIN Modal Popup Styling */
+        .pin-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .pin-modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .pin-modal-box h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .pin-modal-box input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .pin-modal-box button {
+            background-color: #c93b2b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        @media print {
+            html, body {
+                width: 320px;
+                height: 500px;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+            }
+            .mobile-action-bar, .pin-modal-overlay {
+                display: none !important;
+            }
+            .id-card {
+                box-shadow: none !important;
+                margin: 0 !important;
+                border: 2px solid #c93b2b !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 320px !important;
+                height: 500px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🔒 Secret PIN Popup Box -->
+    <div id="pinModal" class="pin-modal-overlay">
+        <div class="pin-modal-box">
+            <h3>Enter Secret PIN</h3>
+            <input type="password" id="secretPinInput" placeholder="Enter PIN here">
+            <button onclick="handlePinSubmit()">Verify & View Card</button>
+        </div>
+    </div>
+
+    <div class="id-card">
+        <div class="card-header">
+            <img src="logo.svg" alt="Logo" class="school-logo-top">
+            <h2>Balasaheb Bharskar High School</h2>
+            <p>Mhaisang • Academic Year 2026-27</p>
+        </div>
+
+        <div class="card-body">
+            <div class="student-photo-box">
+                <img id="cardPhoto" src="https://via.placeholder.com/100x115" alt="Student Photo">
+            </div>
+            
+            <div class="student-name" id="cardName">Loading...</div>
+            <div class="student-class" id="cardClass">Class: --</div>
+
+            <div class="student-info-grid">
+                <div class="info-row">
+                    <span>Roll No / रोल नं:</span>
+                    <span id="cardRoll">--</span>
+                </div>
+                <div class="info-row">
+                    <span>Date of birth / जन्मतारीख:</span>
+                    <span id="cardBod">--</span>
+                </div>
+                <div class="info-row">
+                    <span>Contact / संपर्क:</span>
+                    <span id="cardContact">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <div>
+                <span style="font-size: 22px; font-family: monospace;">|||| ||||  </span>
+            </div>
+            <div class="sign-box">
+                <div class="sign-line">Principal Signature / मुख्याध्यापक स्वाक्षरी</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-action-bar">
+        <button class="print-btn" onclick="window.print()">🖨️ Print / Save ID Card</button>
+    </div>
+
+    <script>
+        // आईडी कार्ड डेटा भरने का फंक्शन
+        function setStudentIdCardData(studentData) {
+            document.getElementById('cardName').innerText = studentData.fullName || "Unknown Student";
+            document.getElementById('cardClass').innerText = `Class: ${studentData.studentClass || "N/A"}`;
+            document.getElementById('cardRoll').innerText = studentData.rollNo || "N/A";
+            document.getElementById('cardBod').innerText = studentData.bod || "N/A";
+            document.getElementById('cardContact').innerText = studentData.contactNumber || "N/A";
+
+            if (studentData.photoUrl) {
+                document.getElementById('cardPhoto').src = studentData.photoUrl;
+            }
+        }
+
+        // यूआरएल से स्टूडेंट आईडी निकालना
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+
+        // जब यूजर पिन डालकर सबमिट बटन दबाएगा
+        function handlePinSubmit() {
+            const secretPin = document.getElementById('secretPinInput').value;
+            
+            if (!secretPin) {
+                alert("Please enter the secret PIN!");
+                return;
+            }
+
+            if (!studentId) {
+                alert("Student ID is missing in URL!");
+                return;
+            }
+
+            // पॉपअप को छुपाना
+            document.getElementById('pinModal').style.display = 'none';
+
+            // वेरीफाई फंक्शन कॉल करना
+            verifyStudentData(studentId, secretPin);
+        }
+
+        // सर्वर पर पिन और आईडी वेरीफाई करने का फंक्शन
+        async function verifyStudentData(studentId, secretPin) {
+            try {
+                const response = await fetch('/.netlify/functions/verify-student', {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        studentId: studentId,
+                        secretPin: secretPin
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.studentData) {
+                    const studentd = result.studentData;
+                    
+                    const sampleStudent = {
+                        fullName: studentd.studentName,
+                        studentClass: studentd.studentClass,
+                        rollNo: studentd.rollNo,
+                        bod: studentd.dob,
+                        contactNumber: studentd.mobileNumber,
+                        photoUrl: studentd.studentPhotoUrl 
+                    };
+
+                    setStudentIdCardData(sampleStudent);
+                } else {
+                    alert("Invalid PIN or verification failed!");
+                    // गलत पिन होने पर वापस पॉपअप दिखा सकते हैं या पेज रीलोड कर सकते हैं
+                    document.getElementById('pinModal').style.display = 'flex';
+                }
+            } catch (err) {
+                console.error("Verification error:", err);
+                alert("Server request failed!");
+                document.getElementById('pinModal').style.display = 'flex';
+            }
+        }
+    </script>
+
+</body>
+</html>

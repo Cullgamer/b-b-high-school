@@ -171,7 +171,7 @@
         <!-- Card 2 -->
         <div class="card" onclick="openAttendance()">
           <div class="card-icon">📝</div>
-          <div class="card-title">Attendance</div>
+          <div class="card-title">Attendance & student</div>
           <div class="card-desc">Mark Student Attendance</div>
         </div>
 
@@ -313,12 +313,7 @@
   };
 
   window.openAttendance = function() {
-    Swal.fire({
-      title: 'Coming Soon!',
-      text: 'This feature is under development.',
-      icon: 'info',
-      confirmButtonColor: '#b83b19'
-    });
+    window.location.href = "student_m.html"
   };
   window.videow = function() {
     window.location.href = "video-view.html";

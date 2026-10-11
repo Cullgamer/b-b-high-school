@@ -328,7 +328,7 @@
     const teacherName = currentTeacherData.fullName || "Teacher";
     const teacherId = currentTeacherData.teacherId || user.uid;
 
-    let uploadResult = { fileUrl: null, publicId: null };
+    let uploadResult = { fileUrl: null, publicId: null, resourceType: null };
     let originalFileName = null;
 
     try {
@@ -366,6 +366,7 @@
         fileUrl: uploadResult.fileUrl,
         cloudName: uploadResult.cloudName,
         publicId: uploadResult.publicId,
+        resourceType: uploadResult.resourceType,
         accessType: accessType,
         timestamp: serverTimestamp()
       });
@@ -423,7 +424,7 @@
             <div style="display: flex; gap: 8px;">
               <a href="${file.fileUrl}" target="_blank" download class="btn-view" style="background: #007bff; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px;">view / download</a>
               
-             <button onclick="deleteFile('${file.id}', '${file.publicId}', '${file.cloudName}')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">🗑️ Delete</button>
+             <button onclick="deleteFile('${file.id}', '${file.publicId}', '${file.cloudName}', '${file.resourceType}')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">🗑️ Delete</button>
 
             </div>
           </div>
@@ -458,7 +459,7 @@
   });
 
   // 🗑️ Delete File Function
-  window.deleteFile = async function(fileId , publicId , accountName) {
+  window.deleteFile = async function(fileId , publicId , accountName, resourceType) {
     const confirmResult = await Swal.fire({
       title: 'Are you sure?',
       text: "This file will be permanently deleted!",
@@ -472,7 +473,7 @@
     if (confirmResult.isConfirmed) {
       try {
         await deleteDoc(doc(db, "files", fileId));
-        cloudinaryDelete(publicId , accountName )
+        cloudinaryDelete(publicId , accountName , resourceType )
         Swal.fire({
           title: 'Deleted!',
           text: 'File has been deleted successfully.',
@@ -491,14 +492,17 @@
       }
     }
   };
-  async function cloudinaryDelete(publicId, accountName) {
+  async function cloudinaryDelete(publicId, accountName, resourceType) {
     try {
         const response = await fetch('/.netlify/functions/Cloudnery_delete_Service', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json' 
             },
-            body: JSON.stringify({ publicId: publicId, accountName: accountName })
+            body: JSON.stringify({ publicId: publicId, accountName: accountName,
+              resourceType: resourceType
+              
+            })
         });
 
         const data = await response.json();

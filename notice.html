@@ -158,6 +158,9 @@
 
     let fileUrl = null;
     let fileType = null;
+    let filepId = null;
+    let resourceType = null;
+    let cloudName = null;
 
     try {
       if (noticeFile) {
@@ -170,7 +173,11 @@
           didOpen: () => Swal.showLoading()
         });
        const result = await uploadToCloudinary(noticeFile);
-       fileUrl = result.fileUrl
+       fileUrl = result.fileUrl;
+       resourceType = result.resourceType;
+       filepId = result.publicId;
+       cloudName = result.cloudName;
+       
       }
 
       // 🔥 Firestore Database में नया नोटिस सेव करें
@@ -178,6 +185,9 @@
         title: noticeTitle,
         desc: noticeDesc,
         fileUrl: fileUrl,
+        filepId: filepId,
+        cloudName: cloudName,
+        resourceType: resourceType,
         fileType: fileType,
         postedBy: currentTeacherData.fullName || "Teacher",
         postedById: currentTeacherData.teacherId || user.uid,

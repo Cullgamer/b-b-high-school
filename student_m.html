@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Teacher Student Management</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: white;
+            color: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .teacher-dashboard {
+            flex: 1;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #222533;
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 22px;
+            color:#BA0000;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .class-filter-select {
+            padding: 8px 12px;
+            background: #FFFFFF;
+            border: 1px solid #334155;
+            color: #000000;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #studentContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .student-card {
+            display: grid;
+            grid-template-columns: 2fr 0.8fr 1.2fr 2fr;
+            align-items: center;
+            background: #FFFFFF;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-left: 4px solid #FF0000;
+            gap: 15px;
+        }
+
+        .student-info h4 {
+            font-size: 16px;
+            color: black;
+            margin-bottom: 3px;
+        }
+
+        .student-info p {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .roll-input {
+            width: 100%;
+            padding: 8px;
+            background: #FFFFFF;
+            border: 1px solid #334155;
+            color: #000000;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status-select {
+            width: 100%;
+            padding: 8px;
+            background: #FFFFFF;
+            border: 1px solid #334155;
+            color: #000000;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .roll-input:focus, .status-select:focus, .class-filter-select:focus {
+            outline: none;
+            border-color: red;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .save-btn {
+            background: #00e5ff;
+            color: #0f1015;
+        }
+        .save-btn:hover { background: #00b8d4; }
+
+        .promote-btn {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .promote-btn:hover { background: #059669; }
+
+        .attendance-btn {
+            background: #8b5cf6;
+            color: #ffffff;
+        }
+        .attendance-btn:hover { background: #7c3aed; }
+
+        @media (max-width: 900px) {
+            .student-card {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="teacher-dashboard">
+        <div class="dashboard-header">
+            <h2>👨‍🏫 Class Student Management</h2>
+            
+            <div class="filter-section">
+                <select id="classFilter" class="class-filter-select" onchange="window.reloadStudents()">
+                    <option value="all">All Classes</option>
+                    <option value="8">Class 8th</option>
+                    <option value="9">Class 9th</option>
+                    <option value="10">Class 10th</option>
+                </select>
+                <div id="totalStudents" style="color: black; font-size: 14px;">Students: 0</div>
+            </div>
+        </div>
+
+        <div id="studentContainer"></div>
+    </div>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { 
+            collection, query, onSnapshot, where, getDocs,updateDoc,doc,getDoc,deleteField 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const auth = getAuth();
+        let currentTeacherData = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const qTeacher = query(collection(db, "teachers"), where("uid", "==", user.uid));
+                    const teacherSnap = await getDocs(qTeacher);
+                    if (!teacherSnap.empty) {
+                        currentTeacherData = teacherSnap.docs[0].data();
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                } catch (err) {
+                    console.error("Teacher Fetch Error:", err);
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        const studentCountDisplay = document.getElementById("totalStudents");
+        const studentContainer = document.getElementById("studentContainer");
+
+        window.reloadStudents = function() {
+            loadStudents();
+        };
+
+        async function loadStudents() {
+            try {
+                const q = query(collection(db, "admissionForms"));
+                
+                onSnapshot(q, (studentdata) => {
+                    studentContainer.innerHTML = "";
+                    let containerHTML = "";
+                    let count = 0;
+                    const selectedClass = document.getElementById("classFilter").value;
+
+                    studentdata.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        let studentClass = data.studentClass; 
+
+                        if (studentClass === selectedClass || selectedClass === "all") {
+                            let excludedStatuses = ["pending", "dropped", "graduated"];
+                            let status = data.status;
+
+                            if (!excludedStatuses.includes(status)) {
+                                count++;
+                                containerHTML += `
+                                    <div class="student-card" data-id="${docSnap.id}">
+                                        <div class="student-info">
+                                            <h4>${data.studentName || 'Name Not Available'}</h4>
+                                            <p>Class: ${data.studentClass || '-'}th | ${data.mobileNumber || '-'}</p>
+                                        </div>
+                                        <div>
+                                            <input type="text" class="roll-input" value="${data.rollNo || ''}" placeholder="Roll No">
+                                        </div>
+                                        <div>
+                                            <select class="status-select">
+                                                <option value="approved" ${data.status === 'approved' ? 'selected' : ''}>Approved</option>
+                                                <option value="retained" ${data.status === 'retained' ? 'selected' : ''}>Retained</option>
+                                                <option value="graduated" ${data.status === 'graduated' ? 'selected' : ''}>Graduated</option>
+                                                <option value="dropped" ${data.status === 'dropped' ? 'selected' : ''}>Dropped</option>
+                                            </select>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button class="btn save-btn">Save</button>
+                                            <button class="btn promote-btn" 
+                    >Promote</button>
+                                            <button class="btn attendance-btn" >Attendance</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    });
+
+                    studentContainer.innerHTML = containerHTML;
+                  studentCountDisplay.innerText = "Students: " + count;
+                  loadbutton()
+                });
+
+            } catch (e) {
+                console.log("Error loading students:", e);
+            }
+        }
+        function loadbutton(){
+       const saveButtons = document.querySelectorAll('.save-btn')
+       saveButtons.forEach(button => {
+           button.addEventListener('click', async (e) =>{
+        const card = e.target.closest('.student-card');
+        const studentId = card.getAttribute('data-id');
+        const rollnom = card.querySelector('.roll-input').value;
+        const status = card.querySelector('.status-select').value;
+      try {
+    await updateDoc(doc(db, "admissionForms", studentId), {
+        rollNo: rollnom,
+        status: status
+    });
+    Swal.fire({
+               title: 'Success!',
+               text: 'Change saved!',
+               icon: 'success',
+               confirmButtonColor: '#b83b19'
+           });
+} catch(e) {
+    console.log("kuchh error aaya", e);
+}
+ });
+  });
+  const promoteButtons = document.querySelectorAll('.promote-btn')
+       promoteButtons.forEach(button => {
+           button.addEventListener('click', async (e) =>{
+               const confirmResult = await Swal.fire({
+            title: 'present or absent',
+            text: 'good luck',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: 'green',
+            cancelButtonColor: 'red',
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel'
+          });
+          if(confirmResult.isConfirmed){
+        const card = e.target.closest('.student-card');
+        const studentId = card.getAttribute('data-id');
+        const rollnom = card.querySelector('.roll-input').value;
+        const status = card.querySelector('.status-select').value;
+        let studentCLASS = "";
+        let attendanceObj = [];
+        try {
+             const stuDATA = await getDoc(doc(db, "admissionForms" , studentId))
+             const studentDATA = stuDATA.data();
+             attendanceObj = studentDATA.attendance || [];
+         studentCLASS = studentDATA.studentClass
+            console.log(studentCLASS)
+        }catch(err){
+            console.log(err)
+        }
+        let totalDays = 0;
+        let presentDays = 0;
+
+        for (let date in attendanceObj) {
+            totalDays++;
+            if (attendanceObj[date] === 'P') {
+                presentDays++;
+            }
+        }
+        const percentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+        const currentYear = new Date().getFullYear();
+        let nextClass = Number(studentCLASS) +1;
+      try {
+          if (nextClass !== 11){
+    await updateDoc(doc(db, "admissionForms", studentId), {[`attendanceHistory.${currentYear}`]: `${percentage}% (${presentDays}/${totalDays} days)`,
+            attendance: deleteField(),
+        studentClass: nextClass.toString(),
+        rollNo: rollnom,
+        status: status
+    });
+    Swal.fire({
+               title: 'Success!',
+               text: 'Change saved!',
+               icon: 'success',
+               confirmButtonColor: '#b83b19'
+           });
+              
+          }else{
+              await updateDoc(doc(db, "admissionForms", studentId), {
+            [`attendanceHistory.${currentYear}`]: `${percentage}% (${presentDays}/${totalDays} days)`,
+attendance: deleteField(),
+        status: "graduated",
+        schoolLeavingReason: "pass out"
+    });
+    Swal.fire({
+               title: 'Success!',
+               text: 'student has been graduate',
+               icon: 'success',
+               confirmButtonColor: '#b83b19'
+           });
+          }
+} catch(e) {
+    console.log("kuchh error aaya", e);
+}}
+ });
+  });
+  const attendanceButtons = document.querySelectorAll('.attendance-btn')
+       attendanceButtons.forEach(button => {
+           button.addEventListener('click', async (e) =>{
+        const card = e.target.closest('.student-card');
+        const studentId = card.getAttribute('data-id');
+        const today = new Date().toISOString().split('T')[0]
+        const confirmResult = await Swal.fire({
+            title: 'Present or Absent',
+            text: 'Good luck',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true, 
+            confirmButtonColor: 'green',
+            denyButtonColor: 'red',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Present',
+            denyButtonText: 'Absent',
+            cancelButtonText: 'Cancel'
+        });
+
+        let attendancestatus = "";
+        
+        if (confirmResult.isConfirmed) {
+            attendancestatus = "P";
+        } else if (confirmResult.isDenied) {
+            attendancestatus = "A";
+        } else if (confirmResult.isDismissed) {
+
+            return;
+        }
+
+      try {
+    await updateDoc(doc(db, "admissionForms", studentId), {[`attendance.${today}`]: attendancestatus
+    });
+    Swal.fire({
+               title: 'Success!',
+               text: 'saved!',
+               icon: 'success',
+               confirmButtonColor: '#b83b19'
+           });
+} catch(e) {
+    console.log("kuchh error aaya", e);
+}
+ });
+  });
+  
+   };
+
+
+        
+        loadStudents();
+    </script>
+</body>
+</html>

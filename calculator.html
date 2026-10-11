@@ -206,7 +206,6 @@
     const cResult = document.getElementById("calcResult");
 
     input.addEventListener("input", (e) => {
-      // सीधा CullCalc से रिजल्ट सेट करना
       let result = CullCalc(e.target.value);
       cResult.innerText = "= " + result;
     });
