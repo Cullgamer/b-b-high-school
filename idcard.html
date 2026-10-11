@@ -401,8 +401,8 @@
 
                 const result = await response.json();
 
-                if (result.success && result.studentData) {
-                    const studentd = result.studentData;
+                if (result.success) {
+                    const studentd = result.data;
                     
                     const sampleStudent = {
                         fullName: studentd.studentName,
