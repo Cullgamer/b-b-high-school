@@ -6,14 +6,17 @@ exports.handler = async function(event, context){
   }
 
   try {
-    const { publicId, accountName } = JSON.parse(event.body);
-    if (!publicId || !accountName){
-      return { statusCode: 400, body: JSON.stringify({ error: 'publicId aur accountName dalna jaruri hai' }) };
-    }
 
+    const { publicId, accountName, resourceType } = JSON.parse(event.body);
+    
+    if (!publicId || !accountName){
+      return { statusCode: 400, body: JSON.stringify({ error: 'public ID aur account name dalna jaruri hai' }) };
+    }
+    
     let cloudname, apikey, apisecret;
+    
     if (accountName === 'schoolCloud1'){
-      cloudname = "xwrqpiq3";
+      cloudname = 'xwrqpiq3';
       apikey = process.env.schoolCloud1_API_Key;
       apisecret = process.env.schoolCloud1_API_Secret;
     } 
@@ -23,7 +26,7 @@ exports.handler = async function(event, context){
       apisecret = process.env.schoolCloud2_API_Secret;
     }  
     else {
-      return { statusCode: 400, body: JSON.stringify({ error: 'account name nahin hai' }) };
+      return { statusCode: 400, body: JSON.stringify({ error: 'account name galat hai' }) };
     }
 
     cloudinary.config({
@@ -32,16 +35,22 @@ exports.handler = async function(event, context){
       api_secret: apisecret
     });
 
-    const result = await cloudinary.uploader.destroy(publicId);
+
+    const fileType = resourceType || 'image'; 
+
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: fileType
+    });
     
-    return { 
+     return { 
       statusCode: 200, 
       body: JSON.stringify({ message: 'deleted successfully', result }) 
     };
+
   } 
   catch (e) {
     return { 
-      statusCode: 500, 
+      statusCode: 500,
       body: JSON.stringify({ error: 'file udane ke liye kuchh error a raha hai', details: e.message }) 
     };
   }
