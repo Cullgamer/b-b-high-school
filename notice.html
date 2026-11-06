@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notice Board - B.B. High School</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="setting.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #f4f7f6; color: #333; padding-bottom: 30px; }
@@ -84,7 +85,7 @@
   import { db } from "./firebase-config.js";
   import { uploadToCloudinary } from "./cloudinaryService.js";
   import { 
-    addDoc, serverTimestamp, collection, query, where, getDocs 
+    addDoc, serverTimestamp, collection, query,onSnapshot, where, getDocs 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   // 🔐 Firebase Auth Imports
@@ -151,6 +152,7 @@
       });
       return;
     }
+
 
     const noticeTitle = document.getElementById("noticeTitle").value;
     const noticeDesc = document.getElementById("noticeDesc").value;

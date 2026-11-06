@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>B.B. High School - Marks Entry</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="setting.js"></script>
   
   <style>
     * {
@@ -209,7 +210,7 @@
 <script type="module">
   import { db } from "./firebase-config.js";
   import { 
-    doc, setDoc, query, collection, where, getDocs, serverTimestamp 
+    doc, setDoc, query, collection, where, getDocs, onSnapshot,serverTimestamp 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   // 🔐 Firebase Auth Imports
@@ -223,21 +224,21 @@
   // 🔒 1. FIREBASE AUTH SESSION CHECK
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      try {
+      
         const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const querySnap = await getDocs(q);
+        onSnapshot(q,async(querySnap) => {
 
         if (!querySnap.empty) {
           currentTeacherData = querySnap.docs[0].data();
         } else {
-          window.location.href = "login.html";
+          window.location.href = "index.html";
         }
-      } catch (err) {
+      } , (err) => {
         console.error("Auth check error:", err);
-      }
+      });
     } else {
       // अगर लॉगिन नहीं है तो सीधे लॉगिन पेज पर भेज दो
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
   });
 

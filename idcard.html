@@ -349,16 +349,22 @@
     <script>
         // आईडी कार्ड डेटा भरने का फंक्शन
         function setStudentIdCardData(studentData) {
-            document.getElementById('cardName').innerText = studentData.fullName || "Unknown Student";
-            document.getElementById('cardClass').innerText = `Class: ${studentData.studentClass || "N/A"}`;
-            document.getElementById('cardRoll').innerText = studentData.rollNo || "N/A";
-            document.getElementById('cardBod').innerText = studentData.bod || "N/A";
-            document.getElementById('cardContact').innerText = studentData.contactNumber || "N/A";
+    document.getElementById('cardName').innerText = studentData.fullName || "Unknown Student";
+    
+    // क्लास और "th" को सही तरीके से जोड़ा गया है
+    document.getElementById('cardClass').innerText = studentData.studentClass ? `Class: ${studentData.studentClass}th` : "Class: N/A";
+    
+    document.getElementById('cardRoll').innerText = studentData.rollNo || "N/A";
+    document.getElementById('cardBod').innerText = studentData.bod || "N/A";
+    
+    // कॉन्टैक्ट नंबर के लिए सही कंडीशन
+    document.getElementById('cardContact').innerText = studentData.contactNumber ? "+91 " + studentData.contactNumber : "N/A";
 
-            if (studentData.photoUrl) {
-                document.getElementById('cardPhoto').src = studentData.photoUrl;
-            }
-        }
+    if (studentData.photoUrl) {
+        document.getElementById('cardPhoto').src = studentData.photoUrl;
+    }
+}
+
 
         // यूआरएल से स्टूडेंट आईडी निकालना
         const urlParams = new URLSearchParams(window.location.search);
@@ -382,7 +388,7 @@
             document.getElementById('pinModal').style.display = 'none';
 
             // वेरीफाई फंक्शन कॉल करना
-            verifyStudentData(studentId, secretPin);
+            (studentId, secretPin);
         }
 
         // सर्वर पर पिन और आईडी वेरीफाई करने का फंक्शन
@@ -425,6 +431,7 @@
                 document.getElementById('pinModal').style.display = 'flex';
             }
         }
+       
     </script>
 
 </body>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script type="module" src="setting.js"></script>
     <title>Admission Forms Dashboard</title>
     <style>
         * {
@@ -244,18 +245,17 @@ document.getElementById("yearFilter").value = rDate;
       // 🔒 1. FIREBASE AUTH SESSION CHECK
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          try {
             const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-            const querySnap = await getDocs(q);
+            onSnapshot(q,(querySnap) => {
 
             if (!querySnap.empty) {
               currentTeacherData = querySnap.docs[0].data();
             } else {
               window.location.href = "index.html";
             }
-          } catch (err) {
+          } ,(err) => {
             console.error("Auth check error:", err);
-          }
+          });
         } else {
           window.location.href = "index.html";
         }
@@ -437,7 +437,6 @@ if (formStatus === "pending") {
 
         const data = await response.json();
         console.log("Server ka jawab:", data);
-        alert("File delete ho gayi bhai!");
     } catch (err) {
         console.error("Request fail ho gayi:", err);
     }

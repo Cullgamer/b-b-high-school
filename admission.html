@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Admission Form - B.B. High School</title>
+    <script type="module" src="voice-assistant.js"></script>
+   <script type="module" src="setting.js"></script>
+    <link rel="stylesheet" href="brand.css">
     <style>
         * {
             margin: 0;
@@ -150,7 +153,8 @@
                 <label class="form-label" id="date">Enter today's date (optional)</label> <input type="text" class="form-input" id="datetoday" placeholder="18/01/2026" >
             </div>
                 <label class="form-label" id="lblPhoto">Student Passport Photo</label>
-                <input type="file" id="photo-s" class="form-input file-input-wrapper">
+                <input type="file" id="photo-s"
+                accept="image/*"class="form-input file-input-wrapper">
             </div>
 
             <div class="form-group">
@@ -166,7 +170,7 @@
 
             <div class="form-group">
                 <label class="form-label" id="lblStudentId">Aadhaar No. / Apaar ID / Student ID</label>
-                <input type="text" class="form-input" id="studentId" placeholder="Enter Aadhaar or Apaar ID">
+                <input type="text" class="form-input" id="studentaadhaarId" placeholder="Enter Aadhaar ID">
             </div>
 
             <div class="form-group">
@@ -259,7 +263,7 @@ console.log(rDate)
   import { db } from "./firebase-config.js";
   import { uploadToCloudinary } from "./cloudinaryService.js";
   import { 
-    addDoc, serverTimestamp, doc, setDoc, collection, query, orderBy, where, getDocs, onSnapshot,getDoc 
+    addDoc, serverTimestamp, doc, setDoc, collection, query, orderBy, where, getDocs, onSnapshot,getDoc,
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -353,17 +357,30 @@ console.log(rDate)
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      try {
-        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const querySnap = await getDocs(q);
+      
+            const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        onSnapshot(q,async(querySnap) => {
         if (!querySnap.empty) {
-          currentTeacherData = querySnap.docs[0].data();
+          const teacherData = querySnap.docs[0].data();
+          const nameElement = document.getElementById("teacherName");
+          if (nameElement) {
+            nameElement.innerText = teacherData.fullName || "Principal Sir";
+          }
+          if(teacherData.status !== "approved"){await Swal.fire({
+      title: 'Admin lock',
+      text: 'You are id is tamperly locked by admin',
+      icon: 'warning',
+      confirmButtonColor: '#b83b19',
+      confirmButtonText: 'ok!',
+    });
+         window.location.href = "index.html";     
+            }
         } else {
           window.location.href = "index.html";
         }
-      } catch (err) {
-        console.error("Auth check error:", err);
-      }
+      } , (error) => {
+        console.error("Error fetching principal data:", error);
+      });
     } else {
       window.location.href = "index.html";
     }
@@ -473,7 +490,7 @@ const year = parseInt(parts[2], 10);
        
        
        const uniqueStudentAdmissionId = `${studentn}_${mothern}_${BOD}`.replace(/[\/\\?%*:|"<>\s]/g, '_');
-       const doneid = `https://b-b-high-school.netlify.app/verify.html?id=${uniqueStudentAdmissionId}`
+       const doneid = `https://bbhsmhaisang.netlify.app/verify.html?id=${uniqueStudentAdmissionId}`
 addmissionData.qrCodeUrl =`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${doneid}`
 try {
    const data = await getDoc(doc(db,"admissionForms",uniqueStudentAdmissionId))
@@ -570,7 +587,7 @@ try {
              document.querySelectorAll(".student-card").forEach(card => {
                  card.addEventListener("click", () => {
                      const studentId = card.getAttribute("data-id");
-                     window.location.href = `detail.html?id=${studentId}`;
+                     window.location.href = `https://bbhsmhaisang.netlify.app/detail.html?id=${studentId}`;
                  });
              });
          });
@@ -594,7 +611,6 @@ try {
 
         const data = await response.json();
         console.log("Server ka jawab:", data);
-        alert("File delete ho gayi bhai!");
     } catch (err) {
         console.error("Request fail ho gayi:", err);
     }

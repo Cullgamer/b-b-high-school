@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>B.B. High School - File Portal</title>
+  <script> src="setting.js"</script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module" src="setting.js"></script>
 
   
   <style>
@@ -283,21 +285,32 @@
   // 🔒 1. FIREBASE AUTH SESSION CHECK (No localStorage)
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      try {
-        const qTeacher = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const teacherSnap = await getDocs(qTeacher);
-
-        if (!teacherSnap.empty) {
-          currentTeacherData = teacherSnap.docs[0].data();
+      
+        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+        onSnapshot(q,async(querySnap) => {
+        if (!querySnap.empty) {
+          const teacherData = querySnap.docs[0].data();
+          const nameElement = document.getElementById("teacherName");
+          if (nameElement) {
+            nameElement.innerText = teacherData.fullName || "Principal Sir";
+          }
+          if(teacherData.status !== "approved"){await Swal.fire({
+      title: 'Admin lock',
+      text: 'You are id is tamperly locked by admin',
+      icon: 'warning',
+      confirmButtonColor: '#b83b19',
+      confirmButtonText: 'ok!',
+    });
+         window.location.href = "index.html";     
+            }
         } else {
-          // अगर Teacher डेटा नहीं मिलता है तो Login पेज पर redirect करो
-          window.location.href = "login.html";
+          window.location.href = "index.html";
         }
-      } catch (err) {
-        console.error("Teacher Fetch Error:", err);
-      }
+      } , (error) => {
+        console.error("Error fetching principal data:", error);
+      });
     } else {
-      // अगर User Logged in नहीं है तो Login पर भेजो
+     
       window.location.href = "index.html";
     }
   });
@@ -507,7 +520,6 @@
 
         const data = await response.json();
         console.log("Server ka jawab:", data);
-        alert("File delete ho gayi bhai!");
     } catch (err) {
         console.error("Request fail ho gayi:", err);
     }

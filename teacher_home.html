@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teacher Home - B.B. High School</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script type="module" src="voice-assistant.js"></script>
 <link rel="stylesheet" href="brand.css">
 <script src="brand.js" defer></script>
+<script  type="module" src="setting.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -54,6 +56,18 @@
       max-width: 600px;
       margin: 0 auto;
     }
+        .logo-container { 
+      text-align: center; 
+      margin-bottom: 15px;
+    }
+    
+    .logo-container img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+      border-radius: 15px;
+    }
 
     .welcome-card {
       background: linear-gradient(135deg, #ffffff, #fff3ee);
@@ -74,18 +88,6 @@
       font-size: 14px;
       color: #666;
     }
-      .logo-container { 
-      text-align: center; 
-      margin-bottom: 15px;
-    }
-    
-    .logo-container img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-      border-radius: 15px;
-    }
 
     .section-title {
       font-size: 16px;
@@ -96,12 +98,12 @@
 
     .grid-menu {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      grid-template-columns: 1fr 1fr;   
+      gap: 10px;
     }
 
     .card {
-      background: white;
+      background: #FFFFFF;
       padding: 20px 15px;
       border-radius: 16px;
       text-align: center;
@@ -121,16 +123,17 @@
     }
 
     .card-title {
-      font-size: 15px;
+      font-size: 10px;
       font-weight: bold;
       color: #333;
     }
 
     .card-desc {
-      font-size: 11px;
+      font-size: 6px;
       color: #888;
       margin-top: 4px;
     }
+   
   </style>
 </head>
 <body>
@@ -141,7 +144,7 @@
     <!-- Top Navbar -->
     <div class="navbar">
       <div class="school-title">🏫 B.B. High School</div>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+
     </div>
 
     <!-- Content Container -->
@@ -224,7 +227,7 @@
   <script type="module">
   import { db } from "./firebase-config.js";
   import { 
-    collection, query, where, getDocs 
+    collection, query, where, getDocs,onSnapshot 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   
   // 🔐 Firebase Auth Imports
@@ -237,16 +240,17 @@
   // 🔒 1. FIREBASE AUTH SESSION CHECK
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      try {
+      
         const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const querySnap = await getDocs(q);
+        onSnapshot(q, async (querySnap) =>{
 
         if (!querySnap.empty) {
           const teacherData = querySnap.docs[0].data();
           const nameElement = document.getElementById("teacherName");
           if (nameElement) {
-            nameElement.innerText = teacherData.fullName || "Teacher";
-            if(teacherData.status !== "approved"){await Swal.fire({
+            nameElement.innerText = teacherData.fullName || "Principal Sir";
+          }
+          if(teacherData.status !== "approved"){await Swal.fire({
       title: 'Admin lock',
       text: 'You are id is tamperly locked by admin',
       icon: 'warning',
@@ -255,13 +259,12 @@
     });
               window.location.href = "index.html";
             }
-          }
         } else {
           window.location.href = "index.html";
         }
-      } catch (error) {
-        console.error("Error fetching teacher data:", error);
-      }
+      } , (error) => {
+        console.error("Error fetching principal data:", error);
+      });
     } else {
       // अगर लॉगिन नहीं है तो डायरेक्ट लॉगिन पेज पर भेज दो
       window.location.href = "index.html";
@@ -287,7 +290,7 @@
     }
   };
 
-  // 📍 Standard Teacher Navigation Links
+Standard Teacher Navigation Links
   window.calc = function() {
     window.location.href = "calculator.html";
   };

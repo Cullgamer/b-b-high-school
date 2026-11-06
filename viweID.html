@@ -92,43 +92,51 @@
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const auth = getAuth();
-  const pendingListContainer = document.getElementById("pendingListContainer");
-  const noRequestDiv = document.getElementById("no-request");
+const pendingListContainer = document.getElementById("pendingListContainer");
+const noRequestDiv = document.getElementById("no-request");
 
-  // 🔒 1. FIREBASE AUTH SESSION CHECK
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
-        const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const querySnap = await getDocs(q);
-
-        if (!querySnap.empty) {
-          const teacherData = querySnap.docs[0].data();
-          const nameElement = document.getElementById("teacherName");
-          if (nameElement) {
-            nameElement.innerText = teacherData.fullName || "Principal Sir";
-          }
-          if(teacherData.status !== "approved"){await Swal.fire({
-      title: 'Admin lock',
-      text: 'You are id is tamperly locked by admin',
-      icon: 'warning',
-      confirmButtonColor: '#b83b19',
-      confirmButtonText: 'ok!',
-    });
-              window.location.href = "index.html";
-            }
-        } else {
-          window.location.href = "index.html";
+// 🔒 1. FIREBASE AUTH SESSION CHECK
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
+    
+    // ⚡ getDocs की जगह onSnapshot यूज़ किया है (Real-time Listener)
+    onSnapshot(q, async (querySnap) => {
+      if (!querySnap.empty) {
+        const teacherData = querySnap.docs[0].data();
+        const nameElement = document.getElementById("teacherName");
+        
+        if (nameElement) {
+          nameElement.innerText = teacherData.fullName || "Principal Sir";
         }
-      } catch (error) {
-        console.error("Error fetching principal data:", error);
-      }
-    } else {
-      // अगर लॉगिन नहीं है तो डायरेक्ट लॉगिन पेज पर भेज दो
-      window.location.href = "index.html";
-    }
-  });
+        
+        // 🚨 अगर एडमिन लाइव स्टेटस चेंज करता है (Approved नहीं है)
+        if (teacherData.status !== "approved") {
+          await Swal.fire({
+            title: 'Admin Lock',
+            text: 'Your account has been temporarily locked by the admin!',
+            icon: 'warning',
+            confirmButtonColor: '#b83b19',
+            confirmButtonText: 'OK',
+            allowOutsideClick: false
+          });
+          
+window.location.href = "index.html";
+          
+        }
+      } else {
 
+        window.location.href = "index.html";
+      }
+    }, (error) => {
+      console.error("Error watching teacher status:", error);
+    });
+    
+  } else {
+    // अगर सेशन लॉगिन नहीं है तो लॉगिन पेज पर भेजो
+    window.location.href = "index.html";
+  }
+});
 
   // 2. Approved Teachers List Fetching (status == "approved")
   const q = query(collection(db, "teachers"), where("status", "==", "approved"));

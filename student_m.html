@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="setting.js"></script>
     <title>Teacher Student Management</title>
     <style>
         * {
@@ -197,17 +198,17 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                try {
+                
                     const qTeacher = query(collection(db, "teachers"), where("uid", "==", user.uid));
-                    const teacherSnap = await getDocs(qTeacher);
+                    onSnapshot(qTeacher, async (teacherSnap) => {
                     if (!teacherSnap.empty) {
                         currentTeacherData = teacherSnap.docs[0].data();
                     } else {
                         window.location.href = "login.html";
                     }
-                } catch (err) {
+                } , (err) => {
                     console.error("Teacher Fetch Error:", err);
-                }
+                });
             } else {
                 window.location.href = "index.html";
             }

@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Principal Home - B.B. High School</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script type="module" src="voice-assistant.js"></script>
   <link rel="stylesheet" href="brand.css">
 <script src="brand.js" defer></script>
+<script type="module" src="setting.js"></script>
 
   <style>
     * {
@@ -144,7 +146,7 @@
     <!-- Top Navbar -->
     <div class="navbar">
       <div class="school-title">🏫 B.B. High School</div>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      
     </div>
 
     <!-- Content Container -->
@@ -241,7 +243,7 @@
   <script type="module">
   import { db } from "./firebase-config.js";
   import { 
-    collection, query, where, getDocs 
+    collection, query, where,onSnapshot, getDocs 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   
   // 🔐 Firebase Auth Imports
@@ -254,9 +256,9 @@
   // 🔒 1. FIREBASE AUTH SESSION CHECK
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      try {
+      
         const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const querySnap = await getDocs(q);
+        onSnapshot(q, async (querySnap) =>{
 
         if (!querySnap.empty) {
           const teacherData = querySnap.docs[0].data();
@@ -276,9 +278,9 @@
         } else {
           window.location.href = "index.html";
         }
-      } catch (error) {
+      } , (error) => {
         console.error("Error fetching principal data:", error);
-      }
+      });
     } else {
       // अगर लॉगिन नहीं है तो डायरेक्ट लॉगिन पेज पर भेज दो
       window.location.href = "index.html";

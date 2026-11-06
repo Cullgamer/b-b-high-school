@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script type="module" src="voice-assistant.js"></script>
     <title>Student Admission Report Card</title>
     <style>
         * {
@@ -369,7 +371,7 @@
 
 <script type="module">
     import { db } from "./firebase-config.js";
-    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { doc, getDoc, collection, query, where,onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const auth = getAuth();
@@ -377,18 +379,30 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            try {
+            
                 const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-                const querySnap = await getDocs(q);
-
-                if (!querySnap.empty) {
-                    currentTeacherData = querySnap.docs[0].data();
-                } else {
-                    window.location.href = "index.html";
-                }
-            } catch (err) {
-                console.error("Auth check error:", err);
+        onSnapshot(q,async(querySnap) => {
+        if (!querySnap.empty) {
+          const teacherData = querySnap.docs[0].data();
+          const nameElement = document.getElementById("teacherName");
+          if (nameElement) {
+            nameElement.innerText = teacherData.fullName || "Principal Sir";
+          }
+          if(teacherData.status !== "approved"){await Swal.fire({
+      title: 'Admin lock',
+      text: 'You are id is tamperly locked by admin',
+      icon: 'warning',
+      confirmButtonColor: '#b83b19',
+      confirmButtonText: 'ok!',
+    });
+         window.location.href = "index.html";     
             }
+        } else {
+          window.location.href = "index.html";
+        }
+      } , (error) => {
+        console.error("Error fetching principal data:", error);
+      });
         } else {
             window.location.href = "index.html";
         }

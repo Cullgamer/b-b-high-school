@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module" src="voice-assistant.js"></script>
+  <script type="module" src="setting.js"></script>
   <title>B.B. High School</title>
   
   <!-- Manifest Link -->
@@ -49,18 +51,18 @@
   // 🔒 1. FIREBASE AUTH SESSION CHECK
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      try {
+      
         const q = query(collection(db, "teachers"), where("uid", "==", user.uid));
-        const querySnap = await getDocs(q);
+        onSnapshot(q,(querySnap)=>{
 
         if (!querySnap.empty) {
           currentTeacherData = querySnap.docs[0].data();
         } else {
           window.location.href = "index.html";
         }
-      } catch (err) {
+      } ,(err) => {
         console.error("Auth check error:", err);
-      }
+      });
     } else {
       // अगर लॉगिन नहीं है तो सीधे लॉगिन पेज पर भेज दो
       window.location.href = "index.html";
@@ -104,14 +106,14 @@
       }
 
       noticeList.innerHTML += `
-        <div style="background:#fff; border-radius:12px; padding:16px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #FF5722;">
+        <div class="card" style="background:#fff; border-radius:12px; padding:16px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #FF5722;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:16px; font-weight:bold; color:#111;">${data.title}</div>
+            <div class="card-title" style="font-size:16px; font-weight:bold; color:#111;">${data.title}</div>
             <span style="font-size:11px; color:#888;">${formattedDate}</span>
             <button class="btn-delete" data-id="${noticeId}">🗑️ Delete</button>
           </div>
           
-          <div style="margin-top:6px; font-size:13px; color:#555; line-height:1.4;">${data.desc || ""}</div>
+          <div class="card-desc" style="margin-top:6px; font-size:13px; color:#555; line-height:1.4;">${data.desc || ""}</div>
           ${fileHTML}
         </div>
       `;
@@ -185,7 +187,6 @@ async function cloudinaryDelete(publicId, accountName, resourceType) {
 
         const data = await response.json();
         console.log("Server ka jawab:", data);
-        alert("File delete ho gayi bhai!");
     } catch (err) {
         console.error("Request fail ho gayi:", err);
     }
