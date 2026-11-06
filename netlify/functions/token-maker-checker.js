@@ -2,10 +2,10 @@ const admin = require('firebase-admin');
 
 function getPrivateKey() {
   let rawKey = process.env.FIREBASE_PRIVATE_KEY_B64 || '';
- 
+
   console.log("Client Email Check:", process.env.FIREBASE_CLIENT_EMAIL);
   console.log("Private Key Length:", process.env.FIREBASE_PRIVATE_KEY_B64 ? process.env.FIREBASE_PRIVATE_KEY_B64.length : "MISSING!");
-  
+
   rawKey = rawKey.trim().replace(/^["']|["']$/g, ''); 
 
   if (!rawKey) return undefined;
@@ -23,7 +23,7 @@ function getPrivateKey() {
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: "bb-high-school-portal", 
+      projectId: process.env.FIREBASE_PROJECT_ID || "bb-high-school-portal",
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: getPrivateKey()
     })
@@ -40,24 +40,27 @@ async function getUserdata(uid) {
 async function validateToken(uid) {
   const tokenDoc = await db.collection('Tokens').doc(uid).get();
   
+
   if (!tokenDoc.exists) {
-    console.log("Token not found!");
-    return { valid: false, message: "Token missing" };
+    console.log("Token not found! Generating a new one automatically...");
+    const newToken = await tokenMaker(uid);
+    const userData = await getUserdata(uid);
+    return { valid: true, newToken, userData, message: "Token generated successfully" };
   } 
 
   const tokenData = tokenDoc.data();
   const tokenTimestamp = tokenData.createdAt; 
 
   const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-
   const tokenTime = typeof tokenTimestamp === 'number' ? tokenTimestamp : (tokenTimestamp.toMillis ? tokenTimestamp.toMillis() : new Date(tokenTimestamp).getTime());
   const currentTime = Date.now();
 
   if ((currentTime - tokenTime) > TWENTY_FOUR_HOURS) {
-    console.log("Token expired!");
-    return { valid: false, message: "Token Expired" };
+    console.log("Token expired! Generating a fresh one...");
+    const newToken = await tokenMaker(uid);
+    const userData = await getUserdata(uid);
+    return { valid: true, newToken, userData, message: "Token refreshed due to expiration" };
   }
-
 
   const userData = await getUserdata(uid);
   
@@ -65,9 +68,12 @@ async function validateToken(uid) {
     return { valid: false, message: "User not found in database" };
   }
 
+
   if (userData.token !== tokenData.token) {
-    console.log("Token mismatch!");
-    return { valid: false, message: "Token does not match" };
+    console.log("Token mismatch! Generating a new one...");
+    const newToken = await tokenMaker(uid);
+    const updatedUserData = await getUserdata(uid);
+    return { valid: true, newToken, userData: updatedUserData, message: "Token refreshed due to mismatch" };
   }
 
   console.log("Token is valid!");
@@ -88,17 +94,18 @@ async function tokenMaker(uid) {
     const n = Math.floor(Math.random() * alphabet.length);
     code = code + alphabet[n];
   }
-  let admin = null;
+  
+  let adminTokenVal = null;
   const roleref = await db.collection('role').doc(uid).get();
+  
   if (!roleref.exists){
     await db.collection('role').doc(uid).set({
       role: 'teacher'
-    })
+    });
   } else {
-   const role =  roleref.data();
-   const currentrole = role.role;
-   if (currentrole === "admin"){
-     admin = code;
+   const roleData = roleref.data();
+   if (roleData.role === "admin"){
+     adminTokenVal = code;
    }
   }
 
@@ -108,7 +115,7 @@ async function tokenMaker(uid) {
 
   await db.collection('Tokens').doc(uid).set({
     token: code,
-    admintoken: admin,
+    admintoken: adminTokenVal,
     createdAt: Date.now()
   });
 
@@ -117,36 +124,55 @@ async function tokenMaker(uid) {
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+    return { 
+      statusCode: 405, 
+      body: JSON.stringify({ error: 'Method Not Allowed' }) 
+    };
   }
 
   try {
-    const { uid } = JSON.parse(event.body);
+    const { uid, userid } = JSON.parse(event.body);
 
-    if (!uid) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'UID is required' }) };
-    }
-
-    const authResult = await validateToken(uid);
-
-    if (!authResult.valid) {
-      return { 
-        statusCode: 401, 
-        body: JSON.stringify({ success: false, message: authResult.message }) 
+    if (!uid || !userid) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Both uid and userid are required' })
       };
     }
+
+    
+    const result = await validateToken(userid);
+
+    if (!result.valid) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ success: false, message: result.message || 'Unauthorized' })
+      };
+    }
+
+    
+    if (result.userData.role !== 'admin') {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({ success: false, message: 'Access Denied: Admin only action!' })
+      };
+    }
+
+    
+    await admin.auth().deleteUser(uid);
+    await db.collection('role').doc(uid).delete();
+    await db.collection('Tokens').doc(uid).delete();
 
     return {
       statusCode: 200,
       body: JSON.stringify({ 
-        success: true, 
-        message: 'Token verified successfully!', 
-        data: authResult.userData 
+        success: true,
+        message: 'User deleted from Firebase Auth and Database successfully!' 
       })
     };
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Auth delete error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
