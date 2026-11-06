@@ -501,7 +501,7 @@ async function verifySessionOnLoad() {
     }
 
     try {
-        const response = await fetch('/.netlify/functions/token-maker&amp;checker.js', {
+        const response = await fetch('/.netlify/functions/token-maker-checker.js', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ uid: userid })
