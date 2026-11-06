@@ -471,9 +471,9 @@ window.logout = async function() {
 async function verifySessionOnLoad() {
     function getCurrentUserUid() {
     return new Promise((resolve, reject) => {
-        // onAuthStateChanged चेक करेगा कि यूजर लॉगइन है या नहीं
+        
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe(); // एक बार चेक होने के बाद लिसनर बंद कर दो ताकि फालतू लोड न पड़े
+            unsubscribe();
             if (user && user.uid) {
                 resolve(user.uid);
             } else {
@@ -501,7 +501,7 @@ async function verifySessionOnLoad() {
     }
 
     try {
-        const response = await fetch('/.netlify/functions/token-maker-checker.js', {
+        const response = await fetch('/.netlify/functions/token-maker-checker', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ uid: userid })
