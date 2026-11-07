@@ -2,10 +2,6 @@ const admin = require('firebase-admin');
 
 function getPrivateKey() {
   let rawKey = process.env.FIREBASE_PRIVATE_KEY_B64 || '';
- 
-  console.log("Client Email Check:", process.env.FIREBASE_CLIENT_EMAIL);
-  console.log("Private Key Length:", process.env.FIREBASE_PRIVATE_KEY_B64 ? process.env.FIREBASE_PRIVATE_KEY_B64.length : "MISSING!");
-  
   rawKey = rawKey.trim().replace(/^["']|["']$/g, ''); 
 
   if (!rawKey) return undefined;
@@ -33,33 +29,29 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 async function getUserdata(uid) {
-  const doc = await db.collection('teachers').doc(uid).get();
-  return doc.exists ? doc.data() : null;
+  const docSnap = await db.collection('teachers').doc(uid).get();
+  return docSnap.exists ? docSnap.data() : null;
 }
 
 async function validateToken(uid) {
   const tokenDoc = await db.collection('Tokens').doc(uid).get();
   
   if (!tokenDoc.exists) {
-    console.log("Token not found!");
-    tokenMaker(uid);
-    return { valid: false, message: "Token missing" };
+    await tokenMaker(uid); // ✅ await अपनी सही जगह पर है
+    return { valid: false, message: "Token missing - Generated new one, please retry." };
   } 
 
   const tokenData = tokenDoc.data();
   const tokenTimestamp = tokenData.createdAt; 
 
   const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-
   const tokenTime = typeof tokenTimestamp === 'number' ? tokenTimestamp : (tokenTimestamp.toMillis ? tokenTimestamp.toMillis() : new Date(tokenTimestamp).getTime());
   const currentTime = Date.now();
 
   if ((currentTime - tokenTime) > TWENTY_FOUR_HOURS) {
-    console.log("Token expired!");
-    tokenMaker(uid);
-    return { valid: false, message: "Token Expired" };
+    await tokenMaker(uid);
+    return { valid: false, message: "Token Expired - Generated new one." };
   }
-
 
   const userData = await getUserdata(uid);
   
@@ -68,12 +60,10 @@ async function validateToken(uid) {
   }
 
   if (userData.token !== tokenData.token) {
-    console.log("Token mismatch!");
-    tokenMaker(uid);
-    return { valid: false, message: "Token does not match" };
+    await tokenMaker(uid);
+    return { valid: false, message: "Token does not match - Regenerated." };
   }
 
-  console.log("Token is valid!");
   return { valid: true, userData };
 }
 
@@ -91,27 +81,30 @@ async function tokenMaker(uid) {
     const n = Math.floor(Math.random() * alphabet.length);
     code = code + alphabet[n];
   }
-  let admin = null;
+
+  let adminTokenValue = null;
   const roleref = await db.collection('role').doc(uid).get();
+  
   if (!roleref.exists){
     await db.collection('role').doc(uid).set({
       role: 'teacher'
-    })
+    });
   } else {
-   const role =  roleref.data();
-   const currentrole = role.role;
-   if (currentrole === "admin"){
-     admin = code;
-   }
+    const roleData = roleref.data();
+    if (roleData.role === "admin"){
+      adminTokenValue = code;
+    }
   }
 
+  // 1. Teachers collection में टोकन सेव करो
   await db.collection('teachers').doc(uid).set({
     token: code
   }, { merge: true }); 
 
+  // 2. Tokens collection में टोकन सेव करो
   await db.collection('Tokens').doc(uid).set({
     token: code,
-    admintoken: admin,
+    admintoken: adminTokenValue,
     createdAt: Date.now()
   });
 
@@ -124,7 +117,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { uid } = JSON.parse(event.body);
+    const bodyData = JSON.parse(event.body || '{}');
+    const uid = bodyData.uid;
 
     if (!uid) {
       return { statusCode: 400, body: JSON.stringify({ error: 'UID is required' }) };
@@ -149,7 +143,7 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Critical Server Error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
