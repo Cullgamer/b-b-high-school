@@ -502,18 +502,20 @@ async function verifySessionOnLoad() {
 
     try {
         const response = await fetch('/.netlify/functions/token-maker-checker', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: userid })
-        });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uid: userid })
+});
 
-        const result = await response.json();
+const result = await response.json();
 
-        if (!response.ok || !result.success) {
-
-            alert("Session expired. Please login again.");
-            window.location.href = "/login.html";
-        } else {
+if (!response.ok || !result.success) {
+    alert("Session expired. Please login again.");
+    setTimeout(() => {
+        window.location.href = "/login.html";
+    }, 1500);
+}
+ else {
 
             sessionStorage.setItem('lastTokenCheck', currentTime);
         }
