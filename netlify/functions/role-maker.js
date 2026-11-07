@@ -42,7 +42,7 @@ const db = admin.firestore();
 }
 try {
 const {uid} = JSON.parse(event.body);
-const docreft = db.collection('Role').doc(uid);
+const docreft = db.collection('role').doc(uid);
 await docreft.set({
   role: "teacher",
   createdAt: admin.firestore.FieldValue.serverTimestamp()
