@@ -153,12 +153,11 @@ exports.handler = async (event) => {
         body: JSON.stringify({ success: false, message: 'Access Denied: Admin only action!' })
       };
     }
-
     // टोकन एकदम सही है और यूजर एडमिन है, अब उड़ा दो!
     await admin.auth().deleteUser(uid);
     await db.collection('role').doc(uid).delete(); // स्पेलिंग 'role' दोनों जगह सेम रखी है
     await db.collection('Tokens').doc(uid).delete();
-
+console.log("success")
     return {
       statusCode: 200,
       body: JSON.stringify({ 
@@ -168,6 +167,7 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
+    console.log("Auth delete error:", error)
     console.error("Auth delete error:", error);
     return {
       statusCode: 500,
