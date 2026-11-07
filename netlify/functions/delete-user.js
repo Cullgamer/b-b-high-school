@@ -72,7 +72,7 @@ async function validateToken(uid) {
   }
 
   console.log("Token is valid!");
-  return { valid: true, userData };
+  return { valid: true, userData, tokenData };
 }
 
 async function tokenMaker(uid) {
@@ -147,7 +147,7 @@ exports.handler = async (event) => {
     }
 
     // (वैकल्पिक सुरक्षा) चेक कर लो कि क्या टोकन भेजने वाला सच में एडमिन है?
-    if (result.userData.role !== 'admin') {
+    if (result.userData.token !== result.tokenData.admintoken) {
       return {
         statusCode: 403,
         body: JSON.stringify({ success: false, message: 'Access Denied: Admin only action!' })
