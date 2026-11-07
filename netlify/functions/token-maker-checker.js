@@ -42,6 +42,7 @@ async function validateToken(uid) {
   
   if (!tokenDoc.exists) {
     console.log("Token not found!");
+    tokenMaker(uid);
     return { valid: false, message: "Token missing" };
   } 
 
@@ -55,6 +56,7 @@ async function validateToken(uid) {
 
   if ((currentTime - tokenTime) > TWENTY_FOUR_HOURS) {
     console.log("Token expired!");
+    tokenMaker(uid);
     return { valid: false, message: "Token Expired" };
   }
 
@@ -67,6 +69,7 @@ async function validateToken(uid) {
 
   if (userData.token !== tokenData.token) {
     console.log("Token mismatch!");
+    tokenMaker(uid);
     return { valid: false, message: "Token does not match" };
   }
 
