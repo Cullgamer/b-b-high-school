@@ -306,7 +306,7 @@ EXAMPLE JSON OUTPUT (When NOT on Admission Page):
                  //   contents: contentsPayload 
               //  })
            // });
-            const apiResponse =await fetch('/.netlify/gemini-proxy', {
+            const apiResponse =await fetch('/.netlify/functions/gemini-proxy', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json' 
