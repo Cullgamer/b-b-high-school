@@ -112,9 +112,9 @@ function startSpeechToText() {
 // 3. AI API कॉल और रिस्पॉन्स हैंडलर
  export async function sendPrompt(promptai) {
     const prompt = promptai;
-    let apiKey = "";
 
-    if (!apiKey || !prompt) {
+
+    if (!prompt) {
         alert("कृपया संदेश भरें!");
         return;
     }
