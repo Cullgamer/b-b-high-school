@@ -226,10 +226,11 @@ window.location.href = "index.html";
           // 2. Netlify फ़ंक्शन कॉल करके Auth से यूज़र हटाएं
           if (userUid) {
             await fetch('/.netlify/functions/delete-user', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ uid: userUid })
-            });
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid: userUid,
+            userid:usercurrentid})
+          });
           }
         }
 

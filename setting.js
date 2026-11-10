@@ -471,9 +471,9 @@ window.logout = async function() {
 async function verifySessionOnLoad() {
     function getCurrentUserUid() {
     return new Promise((resolve, reject) => {
-        
+        // onAuthStateChanged चेक करेगा कि यूजर लॉगइन है या नहीं
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe();
+            unsubscribe(); // एक बार चेक होने के बाद लिसनर बंद कर दो ताकि फालतू लोड न पड़े
             if (user && user.uid) {
                 resolve(user.uid);
             } else {
@@ -496,26 +496,32 @@ async function verifySessionOnLoad() {
 
     const userid = await getCurrentUserUid()
     if (!userid) {
-    window.location.href = '/indexk.html'
+    window.location.href = '/index.html'
         return;
     }
 
     try {
         const response = await fetch('/.netlify/functions/token-maker-checker', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid: userid })
-});
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid: userid })
+        });
 
-const result = await response.json();
+        const result = await response.json();
 
-if (!response.ok || !result.success) {
-    alert("Session expired. Please login again.");
-    setTimeout(() => {
-        window.location.href = "/login.html";
-    }, 1500);
-}
- else {
+        if (!response.ok || !result.success) {
+
+            Swal.fire({
+      title: 'Session expired',
+      text: 'Session expired. Please login again.',
+      icon: 'warning',
+      confirmButtonColor: '#b83b19',
+      confirmButtonText: 'ok!',
+    });
+            setTimeout(() => {
+    window.location.href = "/index.html";
+}, 1500);
+        } else {
 
             sessionStorage.setItem('lastTokenCheck', currentTime);
         }
